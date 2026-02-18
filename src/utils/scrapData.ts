@@ -67,6 +67,13 @@ export default async function scrapData(date: Date) {
       if (metDataElement == null || nameIdElement == null) {
         continue;
       }
+      // Skip slots that don't have all expected child spans — avoids a TypeError
+      // crash on the non-null assertion below when the element structure is incomplete
+      const allChildrenPresent = Object.values(metDataClassNames).every(
+        (cls) => metDataElement.querySelector('.' + cls) !== null
+      );
+      if (!allChildrenPresent) continue;
+
       if (day in results == false) {
         results[day] = [];
       }

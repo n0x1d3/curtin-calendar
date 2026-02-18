@@ -49,11 +49,16 @@ const googleMapsURL = ({ long, lat }: { long: number; lat: number }) =>
   `https://www.google.com/maps/search/?api=1&query=${long}%2C${lat}`;
 
 export async function getLocation(location: string) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 5000);
   try {
     const splitted = splitAt(3, location.replace(' ', ''));
     const formatted = splitted[0] + '.' + splitted[1];
 
-    const res = await fetch(getMazeMapURL(formatted));
+    const res = await fetch(getMazeMapURL(formatted), {
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
 
     const datares = (await res.json()) as locationResponseType;
     const data = datares.result[0];
@@ -72,6 +77,7 @@ export async function getLocation(location: string) {
       }),
     };
   } catch (error) {
+    clearTimeout(timeout);
     return false;
   }
 }

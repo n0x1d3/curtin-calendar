@@ -37,11 +37,14 @@ type SemesterDates = {
  * To add a year, uncomment the template below and fill in the correct dates.
  */
 const knownYearOverrides: { [year: number]: SemesterDates } = {
-  // 2026: {
-  //   1: { start: { month: 2, day: 23 }, end: { month: 5, day: 31 }, weeks: 14 },
-  //   2: { start: { month: 7, day: 20 }, end: { month: 10, day: 25 }, weeks: 14 },
-  //   currentYear: 2026,
-  // },
+  // From 2026 Curtin revised the academic calendar (extra non-teaching week per semester).
+  // Sem 1 starts 3rd Monday of Feb (Feb 16), not the 4th (Feb 23) that the formula gives.
+  // Sem 2 dates are estimated — verify at https://students.curtin.edu.au/essentials/semester-dates/
+  2026: {
+    1: { start: { month: 2, day: 16 }, end: { month: 5, day: 25 }, weeks: 14 },
+    2: { start: { month: 7, day: 20 }, end: { month: 10, day: 26 }, weeks: 14 },
+    currentYear: 2026,
+  },
 };
 
 function calculateDates(year: number): SemesterDates {

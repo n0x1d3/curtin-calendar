@@ -22,9 +22,14 @@ async function readTable() {
   const totalWeeks: number = data.totalWeeks ?? 13;
 
   if (forward < totalWeeks) {
-    // Scrape the current page BEFORE navigating so we don't race the DOM update
-    await addEvents(events);
-    await chrome.storage.local.set({ events: events, forward: forward + 1 });
+    // Scrape the current page BEFORE navigating so we don't race the DOM update.
+    // Try-catch ensures ClickForward always runs even if scraping fails for a week.
+    try {
+      await addEvents(events);
+      await chrome.storage.local.set({ events: events, forward: forward + 1 });
+    } catch {
+      await chrome.storage.local.set({ forward: forward + 1 });
+    }
     ClickForward();
   } else if (forward === totalWeeks) {
     chrome.storage.local.clear();
