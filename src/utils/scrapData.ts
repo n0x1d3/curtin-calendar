@@ -1,55 +1,53 @@
-// ctl00_Content_ctlTimetableMain_TueDayCol_Body_2_BodyContentPanel seminar(6) 10am-120am 2022 122
-// id="ctl00_Content_ctlTimetableMain_TueDayCol_Body_2_HeaderPanel" name
+// DOM structure scraped from the Curtin eStudent timetable page.
+// Each class slot consists of two sibling elements per day column:
+//
+// Metadata panel — contains type, time, and room:
+//   <div id="ctl00_Content_ctlTimetableMain_TueDayCol_Body_3_BodyContentPanel">
+//     <span class="cssTtableClsSlotWhat">Workshop (15)</span>
+//     <span class="cssTtableClsSlotWhen">, 8:00 am-10:00 am</span>
+//     <span class="cssTtableClsSlotWhere">212 107</span>
+//   </div>
+//
+// Header panel — contains the unit code:
+//   <div id="ctl00_Content_ctlTimetableMain_TueDayCol_Body_3_HeaderPanel">
+//     NPSC1003
+//   </div>
 
-// <!-- MetaData -->
-// <div
-//   id="ctl00_Content_ctlTimetableMain_TueDayCol_Body_3_BodyContentPanel"
-//   class="cssTtableBodyContentPanel"
-// >
-//   <br />
-//   <span class="cssTtableClsSlotWhat">Workshop (15)</span>
-//   <span class="cssTtableClsSlotWhen">, 8:00 am-10:00 am</span>
-//   <span class="cssTtableClsSlotWhere">212 107</span>
-// </div>
-
-// <!-- Title -->
-// <div
-//   id="ctl00_Content_ctlTimetableMain_TueDayCol_Body_3_HeaderPanel"
-//   class="cssTtableHeaderPanel"
-// >
-//   NPSC1003
-// </div>
-
-import { scrappedDataType } from '../types';
+import { scrappedDataType, webDays } from '../types';
 import { convertTime, getLocation } from './format/formatData';
 
-/**Returns HTMl element id to be read. Check dataExample.html for an example*/
+// Builds the element IDs for a given day column and slot index.
 const generateElementId = (day: string, count: number) => ({
   metaDataId: `ctl00_Content_ctlTimetableMain_${day}DayCol_Body_${count}_BodyContentPanel`,
   nameId: `ctl00_Content_ctlTimetableMain_${day}DayCol_Body_${count}_HeaderPanel`,
 });
 
-// days in a format that matches the website element ids
-const webDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-
+// CSS class names for the three metadata spans within each slot element.
 const metDataClassNames = {
   type: 'cssTtableClsSlotWhat',
   location: 'cssTtableClsSlotWhere',
   time: 'cssTtableClsSlotWhen',
 };
 
+// Returns a new Date offset by the given number of days.
 function addDays(date: Date, days: number) {
-  var result = new Date(date);
+  const result = new Date(date);
   result.setDate(result.getDate() + days);
   return result;
 }
-/** Max number of slot IDs to probe per day — handles sparse/non-sequential IDs */
+
+// How many slot indices to probe per day column. IDs in ASP.NET timetables are
+// sparse and non-sequential, so we scan a fixed range rather than stopping at
+// the first gap.
 const MAX_SLOTS = 20;
 
-/**  Reads data from webpage returns scrappedData */
+// Scrapes all class slots from the current timetable page for the given week
+// start date. Returns an object keyed by day name (e.g. 'Mon') with an array
+// of scraped class data for each day.
 export default async function scrapData(date: Date) {
   const results: { [key: string]: scrappedDataType[] } = {};
   let dayIndex = 0;
+
   for (const day of webDays) {
     let count = 0;
     while (count < MAX_SLOTS) {
@@ -57,18 +55,17 @@ export default async function scrapData(date: Date) {
       const metDataElement = document.getElementById(elementId.metaDataId);
       const nameIdElement = document.getElementById(elementId.nameId);
       count++;
-      // Skip missing indices rather than stopping — ID gaps are common in ASP.NET timetables
-      if (metDataElement == null || nameIdElement == null) {
-        continue;
-      }
-      // Skip slots that don't have all expected child spans — avoids a TypeError
-      // crash on the non-null assertion below when the element structure is incomplete
+
+      // Skip missing indices — ID gaps are common in ASP.NET timetables
+      if (metDataElement === null || nameIdElement === null) continue;
+
+      // Skip slots missing any expected child span to avoid incomplete data
       const allChildrenPresent = Object.values(metDataClassNames).every(
         (cls) => metDataElement.querySelector('.' + cls) !== null
       );
       if (!allChildrenPresent) continue;
 
-      if (day in results == false) {
+      if (!(day in results)) {
         results[day] = [];
       }
 
@@ -79,23 +76,26 @@ export default async function scrapData(date: Date) {
         title: '',
         date: addDays(date, dayIndex),
       };
+
       for (const [key, value] of Object.entries(metDataClassNames)) {
-        const result = metDataElement.querySelector('.' + value)!
-          .textContent as string;
+        const text = metDataElement.querySelector('.' + value)?.textContent ?? '';
         data[key] =
-          key == 'time'
-            ? convertTime(result)
-            : key == 'location'
-            ? await getLocation(result)
-            : result;
+          key === 'time'
+            ? convertTime(text)
+            : key === 'location'
+            ? await getLocation(text)
+            : text;
       }
-      // Preserve spaces between words (e.g. "COMP1000 Lecture", not "COMP1000Lecture")
+
+      // Collapse whitespace in the unit code (e.g. "COMP1000 Lecture", not "COMP1000Lecture")
       data['title'] = (nameIdElement.textContent as string)
         .replace(/\s+/g, ' ')
         .trim();
+
       results[day].push(data);
     }
     dayIndex++;
   }
+
   return results;
 }

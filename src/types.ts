@@ -1,13 +1,15 @@
+// --- Message commands passed between extension contexts ---
 export enum command {
   download = 'download',
   click = 'click',
-  forward = 'forward',
 }
+
+// --- MazeMap API response shape (only the fields we use) ---
 export interface locationResponseType {
   result: [
     {
       geometry: {
-        coordinates: [number, number];
+        coordinates: [number, number]; // GeoJSON order: [longitude, latitude]
       };
       zValue: number;
       dispBldNames: [string];
@@ -15,15 +17,19 @@ export interface locationResponseType {
   ];
 }
 
+// --- Time types ---
+export type timeStamp = {
+  hour: number;
+  minutes: number;
+};
+
 export interface classTimeType {
   start: timeStamp;
   end: timeStamp;
   differenceInMinutes: number;
 }
-export type timeStamp = {
-  hour: number;
-  minutes: number;
-};
+
+// --- Scraped class data returned by scrapData ---
 export interface scrappedDataType {
   type: string;
   location: {
@@ -32,8 +38,8 @@ export interface scrappedDataType {
     url: string;
     floor: number;
     coordinates: {
-      long: number;
       lat: number;
+      lng: number;
     };
   };
   time: classTimeType;
@@ -41,4 +47,5 @@ export interface scrappedDataType {
   date: Date;
 }
 
+// Days in the format that matches the timetable website element IDs
 export const webDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];

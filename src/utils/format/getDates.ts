@@ -1,3 +1,6 @@
+// --- Date helpers ---
+
+// Returns the nth Monday on or after the given date.
 function getnthMonday(date: Date, n: number) {
   const newDate = new Date(date);
   while (newDate.getDay() !== 1) {
@@ -7,11 +10,14 @@ function getnthMonday(date: Date, n: number) {
   return newDate;
 }
 
+// Returns a new date n weeks after the given date.
 function addnWeeks(date: Date, n: number) {
   const newDate = new Date(date);
   newDate.setDate(newDate.getDate() + 7 * n);
   return newDate;
 }
+
+// --- Types ---
 
 type SemesterEntry = {
   start: { month: number; day: number };
@@ -26,20 +32,20 @@ type SemesterDates = {
   currentYear: number;
 };
 
+// --- Known year overrides ---
+
 /**
- * Known semester dates for years where the formula-based calculation is inaccurate.
+ * Hardcoded semester dates for years where the formula-based calculation is inaccurate.
  * Update this table when Curtin publishes a new academic calendar.
  *
  * From 2026, Curtin added an extra non-teaching week per semester, making the formula
  * unreliable. Verify exact start/end dates at:
  * https://students.curtin.edu.au/essentials/semester-dates/
  *
- * To add a year, uncomment the template below and fill in the correct dates.
+ * Dates sourced from Academic-Calendar-2025-2028-17062025.pdf (approved 27 June 2025).
+ * 2025 matches the formula — no override needed.
  */
 const knownYearOverrides: { [year: number]: SemesterDates } = {
-  // From 2026 Curtin revised the academic calendar (extra non-teaching week per semester).
-  // Dates sourced from Academic-Calendar-2025-2028-17062025.pdf (approved 27 June 2025).
-  // 2025 matches the formula — no override needed.
   2026: {
     1: { start: { month: 2, day: 16 }, end: { month: 5, day: 22 }, weeks: 14 },
     2: { start: { month: 7, day: 20 }, end: { month: 10, day: 23 }, weeks: 14 },
@@ -57,6 +63,11 @@ const knownYearOverrides: { [year: number]: SemesterDates } = {
   },
 };
 
+// --- Formula-based fallback ---
+
+// Estimates semester dates using the historical pattern: semester 1 starts on the
+// 4th Monday of February; semesters are each 13 weeks with an 8-week gap between them.
+// This is accurate for years up to 2025 but unreliable from 2026 onward.
 function calculateDates(year: number): SemesterDates {
   const february = new Date(`February 1, ${year}`);
   const startSem1: Date = getnthMonday(february, 4);
@@ -78,11 +89,16 @@ function calculateDates(year: number): SemesterDates {
   };
 }
 
+// --- Public API ---
+
+// Returns semester dates for the given year, using the override table where
+// available and falling back to the formula for unknown years.
 export function getDates(year: number): SemesterDates {
   return knownYearOverrides[year] ?? calculateDates(year);
 }
 
-/** Returns the total weeks to navigate for a semester (teaching + non-teaching breaks) */
+// Returns the total number of weeks to navigate for a semester,
+// including any mid-semester non-teaching weeks.
 export function getSemesterWeeks(year: number, semester: 1 | 2): number {
   return getDates(year)[semester].weeks;
 }
