@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Curtin Calendar",
   "version": "0.3.3",
-  "description": "Export your Curtin timetable to a calendar file in one click. Actively maintained fork with bug fixes for 2026+.",
+  "description": "Export your Curtin timetable to ICS with room locations, Google Maps, and Curtin campus map links.",
   "icons": {
     "16": "icons/icon_16.png",
     "48": "icons/icon_48.png",

@@ -1,7 +1,7 @@
 {
   "name": "curtin-calendar",
   "version": "0.3.3",
-  "description": "A Chrome extension to export your Curtin timetable to a calendar file. Actively maintained fork with bug fixes for 2026+.",
+  "description": "Export your Curtin timetable to ICS with room locations, Google Maps, and Curtin campus map links.",
   "license": "GPL-3.0-only",
   "private": true,
   "scripts": {
