@@ -13,7 +13,7 @@
 //     NPSC1003
 //   </div>
 
-import { scrapedDataType, LocationData, webDays } from '../types';
+import { scrapedDataType, LocationData, classTimeType, webDays } from '../types';
 import { convertTime, getLocation } from './format/formatData';
 
 // Builds the element IDs for a given day column and slot index.
@@ -71,7 +71,7 @@ export default async function scrapData(date: Date) {
 
       let type = '';
       let location: LocationData | false = false;
-      let time = convertTime('');
+      let time: classTimeType = { start: { hour: 0, minutes: 0 }, end: { hour: 0, minutes: 0 }, differenceInMinutes: 0 };
 
       for (const [key, value] of Object.entries(metDataClassNames)) {
         const text = metDataElement.querySelector('.' + value)?.textContent ?? '';
