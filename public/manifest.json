@@ -13,19 +13,13 @@
     "default_popup": "popup.html"
   },
   "permissions": ["downloads", "storage"],
-  
-  
-    
-  
-  
-  
   "content_scripts": [
     {
       "matches": [
         "https://curtin-web.t1cloud.com/T1SMDefault/WebApps/eStudent/SM/*"
       ],
       "run_at": "document_idle",
-      "js": ["contentScript.js","readTable.js"]
+      "js": ["contentScript.js", "readTable.js"]
     }
   ]
 }
