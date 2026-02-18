@@ -1,7 +1,7 @@
 {
-  "name": "curtin_calendar",
+  "name": "curtin-calendar",
   "version": "0.3.0",
-  "description": "A chrome extension to help import your curtin timetable into your calendar of choice.",
+  "description": "A Chrome extension to export your Curtin timetable to a calendar file. Actively maintained fork with bug fixes for 2026+.",
   "license": "GPL-3.0-only",
   "private": true,
   "scripts": {
