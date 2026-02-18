@@ -38,12 +38,22 @@ type SemesterDates = {
  */
 const knownYearOverrides: { [year: number]: SemesterDates } = {
   // From 2026 Curtin revised the academic calendar (extra non-teaching week per semester).
-  // Sem 1 starts 3rd Monday of Feb (Feb 16), not the 4th (Feb 23) that the formula gives.
-  // Sem 2 dates are estimated — verify at https://students.curtin.edu.au/essentials/semester-dates/
+  // Dates sourced from Academic-Calendar-2025-2028-17062025.pdf (approved 27 June 2025).
+  // 2025 matches the formula — no override needed.
   2026: {
-    1: { start: { month: 2, day: 16 }, end: { month: 5, day: 25 }, weeks: 14 },
-    2: { start: { month: 7, day: 20 }, end: { month: 10, day: 26 }, weeks: 14 },
+    1: { start: { month: 2, day: 16 }, end: { month: 5, day: 22 }, weeks: 14 },
+    2: { start: { month: 7, day: 20 }, end: { month: 10, day: 23 }, weeks: 14 },
     currentYear: 2026,
+  },
+  2027: {
+    1: { start: { month: 2, day: 15 }, end: { month: 5, day: 21 }, weeks: 14 },
+    2: { start: { month: 7, day: 19 }, end: { month: 10, day: 22 }, weeks: 14 },
+    currentYear: 2027,
+  },
+  2028: {
+    1: { start: { month: 2, day: 14 }, end: { month: 5, day: 19 }, weeks: 14 },
+    2: { start: { month: 7, day: 17 }, end: { month: 10, day: 20 }, weeks: 14 },
+    currentYear: 2028,
   },
 };
 
