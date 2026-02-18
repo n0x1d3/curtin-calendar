@@ -5,19 +5,12 @@ import { command } from './types';
 import { ClickForward, dateInput, refreshButton } from './utils/buttons';
 import { addEvents } from './utils/scrapEvents';
 
-async function checkPopupActive() {
-  const res = await chrome.runtime.sendMessage({
-    command: command.forward,
-  });
-  if (!res) {
-    await chrome.storage.local.clear();
-  }
-}
 async function readTable() {
-  await checkPopupActive();
   const data = await chrome.storage.local.get(['forward', 'events', 'totalWeeks']);
   const events: EventAttributes[] = data.events;
-  const forward: number = data.forward;
+  // No active download session — nothing to do
+  if (events === undefined) return;
+  const forward: number = data.forward ?? 0;
   // Fall back to 13 if totalWeeks wasn't stored (e.g. first run with old storage)
   const totalWeeks: number = data.totalWeeks ?? 13;
 
@@ -34,10 +27,14 @@ async function readTable() {
   } else if (forward === totalWeeks) {
     chrome.storage.local.clear();
     const { value, error } = createEvents(events);
-    (await chrome.runtime.sendMessage({
-      command: command.download,
-      value: value,
-    })) as any;
+    try {
+      (await chrome.runtime.sendMessage({
+        command: command.download,
+        value: value,
+      })) as any;
+    } catch {
+      // Popup closed before download completed — nothing to send to
+    }
     dateInput.value = '';
     refreshButton.click();
   }

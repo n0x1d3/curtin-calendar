@@ -10,10 +10,11 @@ const hidden = 'none';
 const button = document.getElementById(command.download) as HTMLElement;
 const loader = document.getElementById('loader') as HTMLElement;
 const errorElement = document.getElementById('error') as HTMLElement;
+const themeToggle = document.getElementById('theme-toggle') as HTMLButtonElement;
 
 async function isLoading() {
-  const loading =
-    (await chrome.storage.local.get('forward')).forward == 0 ? true : false;
+  const { forward } = await chrome.storage.local.get('forward');
+  const loading = forward !== undefined;
 
   if (loading) {
     button.style.display = hidden;
@@ -57,37 +58,6 @@ async function onClick() {
   });
 }
 
-async function OnMessage() {
-  chrome.runtime.onMessage.addListener(async function (
-    request,
-    sender,
-    sendResponse
-  ) {
-    switch (request.command) {
-      case command.download: {
-        await isLoading();
-        const icsFile = new File(
-          [request.value as string],
-          'CurtinCalendar.ics',
-          {
-            type: 'text/calendar',
-          }
-        );
-        const url = URL.createObjectURL(icsFile);
-        chrome.downloads.download({
-          url: url,
-          filename: 'CurtinCalendar.ics',
-        });
-        break;
-      }
-      case command.forward: {
-        sendResponse(true);
-      }
-    }
-
-    return true;
-  });
-}
 // approximate semesters by month
 const yearMonths = [
   [1, 2, 3, 4, 5],
@@ -124,12 +94,29 @@ function getSelectedSemester(): 1 | 2 {
   }
 }
 
+function applyTheme(dark: boolean) {
+  document.body.classList.toggle('dark', dark);
+  themeToggle.textContent = dark ? '☀️' : '🌙';
+}
+
+async function loadTheme() {
+  const { darkMode } = await chrome.storage.sync.get('darkMode');
+  applyTheme(!!darkMode);
+}
+
+function setupThemeToggle() {
+  themeToggle.addEventListener('click', async () => {
+    const isDark = document.body.classList.contains('dark');
+    applyTheme(!isDark);
+    await chrome.storage.sync.set({ darkMode: !isDark });
+  });
+}
+
 function main() {
   setDefaultSemester();
+  isLoading();
   onClick();
-  OnMessage();
+  loadTheme();
+  setupThemeToggle();
 }
-window.addEventListener('unload', async () => {
-  await chrome.storage.local.clear();
-});
 main();
