@@ -4,7 +4,14 @@
 
 ## Install
 
-[**Chrome** extension](https://chromewebstore.google.com/detail/ogmkocokggpfneccbpdmdgagflcmgeef)
+**Option 1 — Chrome Web Store** (coming soon)
+
+**Option 2 — Manual install**
+
+1. Download `curtincalendar-v0.3.0.zip` from the [latest release](https://github.com/n0x1d3/curtin-calendar/releases/latest)
+2. Extract the zip
+3. Open `chrome://extensions` and enable **Developer mode**
+4. Click **Load unpacked** and select the extracted folder
 
 ## Contribution
 
