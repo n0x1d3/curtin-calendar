@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Curtin Calendar",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Export your Curtin timetable to a calendar file in one click. Actively maintained fork with bug fixes for 2026+.",
   "icons": {
     "16": "icons/icon_16.png",
