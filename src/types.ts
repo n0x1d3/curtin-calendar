@@ -13,6 +13,7 @@ export interface locationResponseType {
       };
       zValue: number;
       dispBldNames: [string];
+      poiId: number;
     }
   ];
 }

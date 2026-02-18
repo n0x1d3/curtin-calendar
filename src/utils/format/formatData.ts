@@ -55,9 +55,9 @@ const getMazeMapURL = (q: string) =>
 const googleMapsURL = ({ lat, lng }: { lat: number; lng: number }) =>
   `https://www.google.com/maps/search/?api=1&query=${lat}%2C${lng}`;
 
-// Builds a MazeMap deep link centred on a specific room (Curtin Perth, campusid=296).
-const mazeMapURL = ({ lat, lng, floor }: { lat: number; lng: number; floor: number }) =>
-  `https://use.mazemap.com/#v=1&campusid=296&zlevel=${floor}&center=${lng},${lat}&zoom=18`;
+// Builds a MazeMap deep link that opens and selects a specific room (Curtin Perth, campusid=296).
+const mazeMapURL = ({ lat, lng, floor, poiId }: { lat: number; lng: number; floor: number; poiId: number }) =>
+  `https://use.mazemap.com/#v=1&campusid=296&zlevel=${floor}&center=${lng},${lat}&zoom=18&sharepoitype=poi&sharepoi=${poiId}`;
 
 // Looks up the physical location of a room string (e.g. "212 107") via the
 // MazeMap API. Returns location metadata on success, or false on error/timeout.
@@ -87,7 +87,7 @@ export async function getLocation(location: string) {
       placeName: data.dispBldNames,
       room: parts[1],
       url: googleMapsURL({ lat, lng }),
-      campusMapUrl: mazeMapURL({ lat, lng, floor: data.zValue }),
+      campusMapUrl: mazeMapURL({ lat, lng, floor: data.zValue, poiId: data.poiId }),
     };
   } catch {
     clearTimeout(timeout);

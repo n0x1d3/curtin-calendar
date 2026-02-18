@@ -43,10 +43,19 @@ export const addEvents = async (events: EventAttributes[]) => {
           event.title +
           ' ' +
           event.type +
-          '\n ' +
-          (event.location ? event.location.url : '') +
-          '\n ' +
-          (event.location ? event.location.campusMapUrl : ''),
+          (event.location
+            ? '\n' +
+              event.location.placeName[0] +
+              ', Room ' +
+              event.location.room +
+              '\n\nGoogle Maps:\n ' +
+              event.location.url +
+              '\n\nCurtin Campus Map:\n ' +
+              event.location.campusMapUrl
+            : ''),
+        htmlContent: event.location
+          ? `<b>${event.title} ${event.type}</b><br>${event.location.placeName[0]}, Room ${event.location.room}<br><br>Google Maps:<br><a href="${event.location.url}">${event.location.url}</a><br><br>Curtin Campus Map:<br><a href="${event.location.campusMapUrl}">${event.location.campusMapUrl}</a>`
+          : `<b>${event.title} ${event.type}</b>`,
       };
 
       events.push(singleEvent);
