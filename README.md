@@ -33,23 +33,14 @@ Curtin Calendar reads your timetable from the Curtin student portal and generate
 3. Open `chrome://extensions` and enable **Developer mode**
 4. Click **Load unpacked** and select the extracted folder
 
-## Contribution
+## Contributing
 
-### Run Locally
-
-- `git clone https://github.com/n0x1d3/curtin-calendar.git`
-- `cd curtin-calendar`
-- `npm i`
-- `npm run watch`
-
-### Then follow these instructions to see your extension:
-
-1. Open **chrome://extensions**
-2. Check the **Developer mode** checkbox
-3. Click on the **Load unpacked extension** button
-4. Select the folder **build/**
-
-Fork the repo and submit a pull request!
+1. Fork the repo and clone it locally
+2. Run `npm i` to install dependencies
+3. Run `npm run watch` to build in watch mode
+4. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the `build/` folder
+5. Make your changes — the extension will rebuild automatically
+6. Submit a pull request
 
 ## Credits
 
