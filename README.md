@@ -43,10 +43,10 @@ Curtin Calendar reads your timetable from the Curtin student portal and generate
 
 Fork the repo and submit a pull request!
 
-## License
-
-[GPL-3.0](LICENSE)
-
 ## Credits
 
 Based on the original [curtincalendar](https://github.com/SetroZ/curtincalendar) by [SetroZ](https://github.com/SetroZ). This fork has been significantly extended with room lookup, map links, HTML descriptions, and bug fixes for 2026+.
+
+## License
+
+[GPL-3.0](LICENSE)
