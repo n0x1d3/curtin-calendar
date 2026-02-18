@@ -1,7 +1,5 @@
 # <img src="public/icons/icon_48.png" width="45" align="left"> Curtin Calendar
 
-> Actively maintained fork of [SetroZ/curtincalendar](https://github.com/SetroZ/curtincalendar) — original extension by [SetroZ](https://github.com/SetroZ). All credit to the original author.
-
 ## What it does
 
 Curtin Calendar reads your timetable from the Curtin student portal and generates an ICS file you can import into Google Calendar, Apple Calendar, Outlook, or any other calendar app. Each class is created as an event with the correct time, duration, and location already filled in.
@@ -48,3 +46,7 @@ Fork the repo and submit a pull request!
 ## License
 
 [GPL-3.0](LICENSE)
+
+## Credits
+
+Based on the original [curtincalendar](https://github.com/SetroZ/curtincalendar) by [SetroZ](https://github.com/SetroZ). This fork has been significantly extended with room lookup, map links, HTML descriptions, and bug fixes for 2026+.
