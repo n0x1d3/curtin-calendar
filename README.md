@@ -2,6 +2,20 @@
 
 > Actively maintained fork of [SetroZ/curtincalendar](https://github.com/SetroZ/curtincalendar) — original extension by [SetroZ](https://github.com/SetroZ). All credit to the original author.
 
+## What it does
+
+Curtin Calendar reads your timetable from the Curtin student portal and generates an ICS file you can import into Google Calendar, Apple Calendar, Outlook, or any other calendar app. Each class is created as an event with the correct time, duration, and location already filled in.
+
+## Features
+
+- One-click export of your full weekly timetable to ICS
+- Room details in each event (building name, room number, floor)
+- Google Maps link for each physical class location
+- Curtin campus map link (MazeMap) that opens directly to the correct room and floor
+- Clickable hyperlinks in calendar apps that support HTML descriptions (Outlook, Apple Calendar)
+- Online classes handled gracefully with no broken location data
+- Accurate semester date calculations for 2026 and beyond
+
 ## Install
 
 **Option 1 — Chrome Web Store** (coming soon)
