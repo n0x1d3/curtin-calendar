@@ -29,19 +29,23 @@ export interface classTimeType {
   differenceInMinutes: number;
 }
 
-// --- Scraped class data returned by scrapData ---
-export interface scrappedDataType {
-  type: string;
-  location: {
-    placeName: [string];
-    room: string;
-    url: string;
-    floor: number;
-    coordinates: {
-      lat: number;
-      lng: number;
-    };
+// Physical room data resolved from the MazeMap API.
+// getLocation returns this on success, or false on error/timeout.
+export type LocationData = {
+  placeName: [string];
+  room: string;
+  url: string;
+  floor: number;
+  coordinates: {
+    lat: number;
+    lng: number;
   };
+};
+
+// --- Scraped class data returned by scrapData ---
+export interface scrapedDataType {
+  type: string;
+  location: LocationData | false;
   time: classTimeType;
   title: string;
   date: Date;
