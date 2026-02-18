@@ -49,19 +49,23 @@ function addDays(date: Date, days: number) {
   result.setDate(result.getDate() + days);
   return result;
 }
+/** Max number of slot IDs to probe per day — handles sparse/non-sequential IDs */
+const MAX_SLOTS = 20;
+
 /**  Reads data from webpage returns scrappedData */
 export default async function scrapData(date: Date) {
   const results: { [key: string]: scrappedDataType[] } = {};
   let dayIndex = 0;
   for (const day of webDays) {
     let count = 0;
-    while (true) {
-      //keep reading until we cant find any more classes for the specific webDay
+    while (count < MAX_SLOTS) {
       const elementId = generateElementId(day, count);
       const metDataElement = document.getElementById(elementId.metaDataId);
       const nameIdElement = document.getElementById(elementId.nameId);
+      count++;
+      // Skip missing indices rather than stopping — ID gaps are common in ASP.NET timetables
       if (metDataElement == null || nameIdElement == null) {
-        break;
+        continue;
       }
       if (day in results == false) {
         results[day] = [];
@@ -84,9 +88,11 @@ export default async function scrapData(date: Date) {
             ? await getLocation(result)
             : result;
       }
-      data['title'] = (nameIdElement.textContent as string).replace(/\s+/g, ''); // regex to remove all spaces,tabs, newlines
+      // Preserve spaces between words (e.g. "COMP1000 Lecture", not "COMP1000Lecture")
+      data['title'] = (nameIdElement.textContent as string)
+        .replace(/\s+/g, ' ')
+        .trim();
       results[day].push(data);
-      count++;
     }
     dayIndex++;
   }

@@ -22,7 +22,9 @@ export function setDate(sem: number) {
 }
 
 export function readDate() {
-  return new Date(dateInput.value);
+  // dateInput.value is DD-MM-YYYY; new Date(string) mis-parses this format in most engines
+  const parts = dateInput.value.split('-');
+  return new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
 }
 export function ClickForward() {
   forwardButton.click();

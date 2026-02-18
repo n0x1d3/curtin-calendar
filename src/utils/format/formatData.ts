@@ -36,8 +36,6 @@ export function convertTime(timeString: string): classTimeType {
   return { start, end, differenceInMinutes };
 }
 
-console.log(convertTime(',8:00 am-12:00 pm'));
-
 //212 107
 const splitAt = (index: number, array: string) => [
   array.slice(0, index),
