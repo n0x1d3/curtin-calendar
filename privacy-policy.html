@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — Curtin Calendar</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      max-width: 720px;
+      margin: 60px auto;
+      padding: 0 24px;
+      color: #222;
+      line-height: 1.7;
+    }
+    h1 { font-size: 1.8rem; margin-bottom: 4px; }
+    h2 { font-size: 1.1rem; margin-top: 36px; }
+    p, li { font-size: 0.95rem; color: #444; }
+    .updated { font-size: 0.85rem; color: #888; margin-bottom: 36px; }
+  </style>
+</head>
+<body>
+  <h1>Privacy Policy</h1>
+  <p class="updated">Last updated: February 2026</p>
+
+  <p>Curtin Calendar is a Chrome extension that exports your Curtin University timetable to an ICS calendar file. This policy explains how the extension handles your data.</p>
+
+  <h2>Data collection</h2>
+  <p>Curtin Calendar does <strong>not</strong> collect, store, or transmit any personal data. No information is sent to any external server by the extension itself.</p>
+
+  <h2>How it works</h2>
+  <p>The extension reads your timetable directly from the Curtin student portal page that is already open in your browser. This data is processed entirely on your device and written to an ICS file saved locally. It is never uploaded or shared.</p>
+
+  <h2>Third-party services</h2>
+  <p>When a physical room is associated with a class, the extension queries the <a href="https://www.mazemap.com">MazeMap</a> public search API to look up the room's location. The query contains only the room identifier (e.g. "212.107") and no personal information. MazeMap's own privacy policy applies to this request.</p>
+
+  <h2>Storage</h2>
+  <p>The extension uses Chrome's local and sync storage APIs solely to:</p>
+  <ul>
+    <li>Pass timetable data between the content script and service worker during an export</li>
+    <li>Remember your dark mode preference</li>
+  </ul>
+  <p>This data never leaves your device (except for the dark mode preference, which Chrome may sync across your own signed-in devices via your Google account).</p>
+
+  <h2>Permissions</h2>
+  <ul>
+    <li><strong>downloads</strong> — to save the generated ICS file to your device</li>
+    <li><strong>storage</strong> — to pass data between extension components and store your preference</li>
+    <li><strong>Host access to curtin-web.t1cloud.com</strong> — to read your timetable from the Curtin student portal</li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p>If you have any questions, open an issue on the <a href="https://github.com/n0x1d3/curtin-calendar">GitHub repository</a>.</p>
+</body>
+</html>
