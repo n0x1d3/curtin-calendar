@@ -14,6 +14,14 @@ Curtin Calendar reads your timetable from the Curtin student portal and generate
 - Online classes handled gracefully with no broken location data
 - Accurate semester date calculations for 2026 and beyond
 
+## Usage
+
+1. Log in to the [Curtin student portal](https://curtin-web.t1cloud.com) (eStudent)
+2. Navigate to **My Classes** under your timetable
+3. Click the Curtin Calendar extension icon in your browser toolbar
+4. Click **Download** — an ICS file will be saved to your device
+5. Import the ICS file into Google Calendar, Apple Calendar, Outlook, or any calendar app
+
 ## Install
 
 **Option 1 — Chrome Web Store** (coming soon)
