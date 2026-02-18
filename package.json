@@ -1,6 +1,6 @@
 {
   "name": "curtin-calendar",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A Chrome extension to export your Curtin timetable to a calendar file. Actively maintained fork with bug fixes for 2026+.",
   "license": "GPL-3.0-only",
   "private": true,
