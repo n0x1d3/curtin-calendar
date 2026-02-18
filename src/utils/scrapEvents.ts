@@ -44,7 +44,9 @@ export const addEvents = async (events: EventAttributes[]) => {
           ' ' +
           event.type +
           '\n ' +
-          (event.location ? event.location.url : ''),
+          (event.location ? event.location.url : '') +
+          '\n ' +
+          (event.location ? event.location.campusMapUrl : ''),
       };
 
       events.push(singleEvent);

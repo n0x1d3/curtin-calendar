@@ -35,6 +35,7 @@ export type LocationData = {
   placeName: [string];
   room: string;
   url: string;
+  campusMapUrl: string;
   floor: number;
   coordinates: {
     lat: number;
