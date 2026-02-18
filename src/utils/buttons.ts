@@ -50,19 +50,3 @@ export function readDate() {
 export function ClickForward() {
   forwardButton.click();
 }
-
-function setDate2() {
-  // const enterKeyEvent = new KeyboardEvent('keydown', {
-  //   key: 'Enter',
-  //   code: 'Enter',
-  //   which: 13,
-  //   keyCode: 13,
-  // });
-  // focus();
-  // dateInput.focus();
-  // dateInput.dispatchEvent(enterKeyEvent);
-  // setTimeout(() => {
-  //   dateInput.dispatchEvent(enterKeyEvent);
-  //   refreshButton.click();
-  // }, 1000);
-}

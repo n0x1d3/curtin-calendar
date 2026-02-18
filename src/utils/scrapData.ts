@@ -38,12 +38,6 @@ const metDataClassNames = {
   time: 'cssTtableClsSlotWhen',
 };
 
-interface metaDataType {
-  type: string;
-  location: string;
-  time: Date | false;
-  title: string;
-}
 function addDays(date: Date, days: number) {
   var result = new Date(date);
   result.setDate(result.getDate() + days);

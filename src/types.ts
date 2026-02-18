@@ -3,16 +3,6 @@ export enum command {
   click = 'click',
   forward = 'forward',
 }
-export enum responses {
-  fail = 'fail',
-  success = 'success',
-}
-
-export enum errors {
-  fetchLocation = 'fetchLocation',
-  formatData = 'formatData',
-  format = 'format',
-}
 export interface locationResponseType {
   result: [
     {
@@ -51,48 +41,4 @@ export interface scrappedDataType {
   date: Date;
 }
 
-export interface monthListType {
-  February: Date;
-  May: Date;
-  July: Date;
-  October: Date;
-}
-
-export const webMonths = [
-  '0',
-  'Jan',
-  'Feb',
-  'Mar',
-  'Apr',
-  'May',
-  'Jun',
-  'Jul',
-  'Aug',
-  'Sep',
-  'Oct',
-  'Nov',
-  'Dec',
-];
 export const webDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-export interface semesterDatesType {
-  1: {
-    start: {
-      month: number;
-      day: number;
-    };
-    end: {
-      month: number;
-      day: number;
-    };
-  };
-  2: {
-    start: {
-      month: number;
-      day: number;
-    };
-    end: {
-      month: number;
-      day: number;
-    };
-  };
-}
