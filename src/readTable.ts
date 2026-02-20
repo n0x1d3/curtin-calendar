@@ -1,6 +1,6 @@
 import { createEvents, EventAttributes } from 'ics';
 import { command } from './types';
-import { ClickForward, dateInput, refreshButton } from './utils/buttons';
+import { clickForward, dateInput, refreshButton } from './utils/buttons';
 import { addEvents } from './utils/scrapEvents';
 
 // Content script entry point: called once on every timetable page load.
@@ -26,7 +26,7 @@ async function readTable() {
     } catch {
       await chrome.storage.local.set({ forward: forward + 1 });
     }
-    ClickForward();
+    clickForward();
   } else if (forward === totalWeeks) {
     // All weeks scraped — clear session state, then generate and download the ICS file.
     chrome.storage.local.remove(['events', 'forward', 'semester', 'totalWeeks']);

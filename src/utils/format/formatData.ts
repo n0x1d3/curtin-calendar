@@ -4,20 +4,16 @@ import { classTimeType, locationResponseType, timeStamp } from '../../types';
 
 // Converts a single time token like "8:00am" or "2:30pm" to a 24-hour timestamp.
 const parseTo24h = (time: string): timeStamp => {
-  let parts: string[];
   let offset = 0;
-  if (time.match('am')) {
+  let parts: string[];
+  if (time.includes('am')) {
     parts = time.split('am')[0].split(':');
-    // 12:xxam is midnight (hour 0 in 24h), not hour 12
+    // 12:xxam is midnight (hour 0), not hour 12
     if (Number(parts[0]) === 12) offset = -12;
   } else {
-    // 12 pm stays as-is; all other pm hours get +12
-    if (time[0] === '1' && time[1] === '2') {
-      parts = time.split('pm')[0].split(':');
-    } else {
-      parts = time.split('pm')[0].split(':');
-      offset = 12;
-    }
+    parts = time.split('pm')[0].split(':');
+    // 12:xxpm stays as-is; all other pm hours need +12
+    if (!(time[0] === '1' && time[1] === '2')) offset = 12;
   }
   return { hour: Number(parts[0]) + offset, minutes: Number(parts[1]) };
 };
@@ -34,24 +30,14 @@ export function convertTime(timeString: string): classTimeType {
   const time = splitToStartEnd(timeString);
   const start = parseTo24h(time.start);
   const end = parseTo24h(time.end);
-  // Simple subtraction — Math.abs was wrong here: a 9:30–10:00 class would
-  // calculate as (1*60) + abs(30-0) = 90 min instead of the correct 30 min.
-  const differenceInMinutes =
-    (end.hour - start.hour) * 60 + (end.minutes - start.minutes);
+  const differenceInMinutes = (end.hour - start.hour) * 60 + (end.minutes - start.minutes);
   return { start, end, differenceInMinutes };
 }
 
 // --- Location lookup ---
 
-// Splits a string at a given index, e.g. splitAt(3, "212107") → ["212", "107"].
-const splitAt = (index: number, str: string) => [
-  str.slice(0, index),
-  str.slice(index),
-];
-
 // Builds a MazeMap search URL for a given room query string.
-// campusid=296 is Curtin Perth; the lat/lng are the campus centre coordinates
-// used to boost nearby results.
+// campusid=296 is Curtin Perth; lat/lng are the campus centre used to boost nearby results.
 const getMazeMapURL = (q: string) =>
   `https://search.mazemap.com/search/equery/?q=${q}&rows=1&start=0&withpois=true&withbuilding=true&withtype=true&withcampus=true&campusid=296&lng=115.89582570734012&lat=-32.00742307052456&boostbydistance=true`;
 

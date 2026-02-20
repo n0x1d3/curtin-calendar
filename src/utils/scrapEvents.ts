@@ -23,7 +23,7 @@ export const addEvents = async (events: EventAttributes[]) => {
       // fall back to 'ONLINE' for classes without a room lookup result.
       const ifLocation = event.location
         ? {
-            location: `${event.location.placeName[0]}  Room:${event.location.room}  floor:${event.location.floor}`,
+            location: `${event.location.placeName[0]}  Room: ${event.location.room}  Floor: ${event.location.floor}`,
             geo: {
               lat: event.location.coordinates.lat,
               lon: event.location.coordinates.lng,

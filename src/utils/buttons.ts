@@ -17,9 +17,9 @@ export const refreshButton = document.getElementById(
 
 // Sets the timetable date input to the start of the given semester and submits
 // the filter form to load that week's timetable.
-export function setDate(sem: number) {
+export function setDate(sem: 1 | 2) {
   const dates = getDates(new Date().getFullYear());
-  const start = dates[sem as 1 | 2].start;
+  const start = dates[sem].start;
   dateInput.value = `${start.day}-${start.month}-${new Date().getFullYear()}`;
   refreshButton.click();
 }
@@ -62,6 +62,6 @@ export function readDate() {
 }
 
 // Clicks the "next week" navigation button on the timetable page.
-export function ClickForward() {
+export function clickForward() {
   forwardButton.click();
 }
