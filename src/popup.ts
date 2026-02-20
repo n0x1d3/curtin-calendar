@@ -66,8 +66,10 @@ async function updateLoadingUI() {
   const loading = forward !== undefined;
 
   if (loading) {
-    const week = (forward as number) + 1;
     const total = (totalWeeks as number) ?? 13;
+    // Cap at total — forward briefly equals totalWeeks while the final page
+    // is being processed, which would otherwise show e.g. "week 15 of 14".
+    const week = Math.min((forward as number) + 1, total);
     const pct = Math.min(100, Math.round(((forward as number) / total) * 100));
 
     // Stuck detection — warn if the same week has persisted for too long
