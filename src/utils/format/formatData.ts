@@ -8,6 +8,8 @@ const parseTo24h = (time: string): timeStamp => {
   let offset = 0;
   if (time.match('am')) {
     parts = time.split('am')[0].split(':');
+    // 12:xxam is midnight (hour 0 in 24h), not hour 12
+    if (Number(parts[0]) === 12) offset = -12;
   } else {
     // 12 pm stays as-is; all other pm hours get +12
     if (time[0] === '1' && time[1] === '2') {
@@ -32,8 +34,10 @@ export function convertTime(timeString: string): classTimeType {
   const time = splitToStartEnd(timeString);
   const start = parseTo24h(time.start);
   const end = parseTo24h(time.end);
+  // Simple subtraction — Math.abs was wrong here: a 9:30–10:00 class would
+  // calculate as (1*60) + abs(30-0) = 90 min instead of the correct 30 min.
   const differenceInMinutes =
-    (end.hour - start.hour) * 60 + Math.abs(start.minutes - end.minutes);
+    (end.hour - start.hour) * 60 + (end.minutes - start.minutes);
   return { start, end, differenceInMinutes };
 }
 
@@ -65,9 +69,11 @@ export async function getLocation(location: string) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
-    // Room format is "BBB RRR" (building + room); convert to "BBB.RRR" for MazeMap
-    const parts = splitAt(3, location.replace(' ', ''));
-    const formatted = parts[0] + '.' + parts[1];
+    // Room format is "BBB RRR" (building + room); convert to "BBB.RRR" for MazeMap.
+    // Split on the space so building codes of any length are handled correctly
+    // (splitting at a hardcoded index of 3 breaks codes that aren't 3 characters).
+    const parts = location.split(' ');
+    const formatted = parts[0] + '.' + parts.slice(1).join('');
 
     const res = await fetch(getMazeMapURL(formatted), {
       signal: controller.signal,

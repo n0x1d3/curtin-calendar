@@ -1,6 +1,6 @@
 {
   "name": "curtin-calendar",
-  "version": "0.3.3",
+  "version": "0.4.0",
   "description": "Export your Curtin timetable to ICS with room locations, Google Maps, and Curtin campus map links.",
   "license": "GPL-3.0-only",
   "private": true,
@@ -9,6 +9,9 @@
     "build": "webpack --mode=production --config config/webpack.config.js",
     "pack": "node pack.js",
     "repack": "npm run build && npm run pack",
+    "watch:beta": "webpack --mode=development --watch --config config/webpack.beta.js",
+    "build:beta": "webpack --mode=production --config config/webpack.beta.js",
+    "repack:beta": "npm run build:beta && node pack.beta.js",
     "format": "prettier --write --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\""
   },
   "devDependencies": {

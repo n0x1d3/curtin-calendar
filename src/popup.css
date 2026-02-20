@@ -1,3 +1,21 @@
+/* Nunito bundled locally — closest free match to Curtin's brand font (Sansa Soft Pro).
+   Bundled so the font loads instantly with no network dependency. */
+@font-face {
+  font-family: 'Nunito';
+  src: url('fonts/Nunito-700.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: block;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  src: url('fonts/Nunito-800.ttf') format('truetype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: block;
+}
+
 *,
 *::before,
 *::after {
@@ -18,6 +36,8 @@
   --gold-hover: #e6b000;
   --spinner-track: #e5e7eb;
   --error: #ef4444;
+  --success: #22c55e;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 1px 2px rgba(0, 0, 0, 0.04);
 }
 
 body.dark {
@@ -32,6 +52,8 @@ body.dark {
   --gold-hover: #e6b000;
   --spinner-track: #3f3f46;
   --error: #f87171;
+  --success: #4ade80;
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 html {
@@ -40,7 +62,7 @@ html {
 }
 
 body {
-  width: 300px;
+  width: 320px;
   background: var(--bg);
   transition: background 0.2s ease, color 0.2s ease;
 }
@@ -64,11 +86,51 @@ body {
   position: relative;
 }
 
+/* title-group: holds the logo, title, and beta badge inline */
+.title-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+/* Curtin crest — transparent background so it sits cleanly on any theme */
+.curtin-logo {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  mix-blend-mode: multiply;
+}
+
+body.dark .curtin-logo {
+  mix-blend-mode: normal;
+  filter: invert(1) hue-rotate(180deg);
+}
+
 .title {
+  /* Nunito matches Curtin's brand font (Sansa Soft Pro) with its rounded terminals */
+  font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 18px;
-  font-weight: 700;
-  letter-spacing: -0.3px;
+  font-weight: 800;
+  letter-spacing: -0.2px;
   color: var(--text-primary);
+}
+
+/* Beta badge — hidden by default, shown when body.beta is set by JS */
+.beta-badge {
+  display: none;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  background: var(--gold);
+  padding: 2px 6px;
+  border-radius: 4px;
+  line-height: 1.6;
+}
+
+body.beta .beta-badge {
+  display: inline-block;
 }
 
 .subtitle {
@@ -102,10 +164,42 @@ body {
 .instructions {
   background: var(--bg-card);
   border-radius: 8px;
-  padding: 10px 14px;
+  padding: 10px 14px 10px 32px;
   font-size: 13px;
   color: var(--text-card);
   line-height: 1.5;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Gold numbered list markers */
+.instructions li::marker {
+  color: var(--gold);
+  font-weight: 700;
+}
+
+/* "My Classes" inline link — looks like a text link, not a button */
+.inline-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--gold-hover);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.inline-link:hover {
+  color: var(--gold);
+}
+
+.inline-link:focus {
+  outline: none;
 }
 
 /* Semester pill toggle */
@@ -115,6 +209,7 @@ body {
   border-radius: 8px;
   padding: 3px;
   gap: 3px;
+  box-shadow: var(--shadow);
 }
 
 .toggle-option {
@@ -143,21 +238,20 @@ body {
   font-weight: 600;
 }
 
-/* Note */
-#note {
-  font-size: 11px;
-  color: var(--text-muted);
-  text-align: center;
-}
-
-/* Button area */
+/* Button area — column so loader-area and button stack vertically */
 .button-container {
   display: flex;
-  justify-content: center;
-  align-items: center;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
 }
 
+/* Download button */
 .button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   width: 100%;
   padding: 11px;
   background: var(--gold);
@@ -167,8 +261,9 @@ body {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
+  transition: background 0.15s ease, transform 0.1s ease, opacity 0.15s ease;
   letter-spacing: 0.1px;
+  box-shadow: var(--shadow);
 }
 
 .button:hover {
@@ -183,16 +278,127 @@ body {
   outline: none;
 }
 
-/* Loader */
-.loader {
+/* Disabled state — shown when not on the eStudent page */
+.button:disabled,
+.button.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.button:disabled:hover,
+.button.disabled:hover {
+  background: var(--gold);
+}
+
+/* Download icon inside the button */
+.download-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  stroke: currentColor;
+}
+
+/* Loader area — hidden by default; JS sets display:flex when scraping */
+.loader-area {
   display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 4px 0 2px;
+}
+
+/* Spinner */
+.loader {
   width: 28px;
   height: 28px;
   border: 3px solid var(--spinner-track);
   border-top: 3px solid var(--gold);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
-  margin: 6px auto;
+}
+
+/* Progress bar track */
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--spinner-track);
+  border-radius: 99px;
+  overflow: hidden;
+}
+
+/* Progress fill — width driven by JS */
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--gold);
+  border-radius: 99px;
+  transition: width 0.4s ease;
+}
+
+/* "Scraping week X of Y…" */
+.progress-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* "This window may close…" hint */
+.progress-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* Cancel button — plain text link style inside the loader */
+.cancel-btn {
+  background: none;
+  border: none;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  transition: color 0.15s ease;
+}
+
+.cancel-btn:hover {
+  color: var(--error);
+}
+
+.cancel-btn:focus {
+  outline: none;
+}
+
+/* Success area — briefly shown after download completes */
+.success-area {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 0;
+}
+
+.success-check {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--success);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.success-text {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--success);
 }
 
 /* Error */
@@ -202,6 +408,14 @@ body {
   color: var(--error);
   text-align: center;
   display: none;
+}
+
+/* Version number — small muted footer */
+.version {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-align: center;
+  margin-top: -8px;
 }
 
 @keyframes spin {

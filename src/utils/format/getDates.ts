@@ -72,15 +72,24 @@ function calculateDatesPre2026(year: number): SemesterDates {
   const endSem1: Date = addnWeeks(startSem1, 13);
   const startSem2: Date = addnWeeks(endSem1, 8);
   const endSem2: Date = addnWeeks(startSem2, 13);
+
+  // Subtract one day from the calculated Monday to get the last Sunday of each semester.
+  // Do this via a Date object so the month rolls back correctly if the Monday
+  // happens to fall on the 1st (e.g. June 1 → last day is May 31, not day 0).
+  const lastDaySem1 = new Date(endSem1);
+  lastDaySem1.setDate(lastDaySem1.getDate() - 1);
+  const lastDaySem2 = new Date(endSem2);
+  lastDaySem2.setDate(lastDaySem2.getDate() - 1);
+
   return {
     1: {
       start: { month: 2, day: startSem1.getDate() },
-      end: { month: 5, day: endSem1.getDate() - 1 },
+      end: { month: lastDaySem1.getMonth() + 1, day: lastDaySem1.getDate() },
       weeks: 13,
     },
     2: {
       start: { month: 7, day: startSem2.getDate() },
-      end: { month: 10, day: endSem2.getDate() - 1 },
+      end: { month: lastDaySem2.getMonth() + 1, day: lastDaySem2.getDate() },
       weeks: 13,
     },
     currentYear: year,
@@ -95,15 +104,23 @@ function calculateDates2026Plus(year: number): SemesterDates {
   const endSem1: Date = addnWeeks(startSem1, 14);
   const startSem2: Date = getnthMonday(new Date(year, 6, 1), 3);
   const endSem2: Date = addnWeeks(startSem2, 14);
+
+  // Subtract one day to get the last Sunday of each semester.
+  // Using setDate handles month roll-back correctly (e.g. June 1 → May 31).
+  const lastDaySem1 = new Date(endSem1);
+  lastDaySem1.setDate(lastDaySem1.getDate() - 1);
+  const lastDaySem2 = new Date(endSem2);
+  lastDaySem2.setDate(lastDaySem2.getDate() - 1);
+
   return {
     1: {
       start: { month: 2, day: startSem1.getDate() },
-      end: { month: 5, day: endSem1.getDate() - 1 },
+      end: { month: lastDaySem1.getMonth() + 1, day: lastDaySem1.getDate() },
       weeks: 14,
     },
     2: {
       start: { month: 7, day: startSem2.getDate() },
-      end: { month: 10, day: endSem2.getDate() - 1 },
+      end: { month: lastDaySem2.getMonth() + 1, day: lastDaySem2.getDate() },
       weeks: 14,
     },
     currentYear: year,

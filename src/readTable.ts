@@ -28,9 +28,24 @@ async function readTable() {
     }
     ClickForward();
   } else if (forward === totalWeeks) {
-    // All weeks scraped — clear session state, generate the ICS file, and download it.
+    // All weeks scraped — clear session state, then generate and download the ICS file.
     chrome.storage.local.remove(['events', 'forward', 'semester', 'totalWeeks']);
-    const { value } = createEvents(events);
+
+    // If no events were collected the user has no enrolled classes for this semester.
+    // Store a user-facing error for the popup to display instead of downloading an empty file.
+    if (events.length === 0) {
+      await chrome.storage.local.set({ lastError: 'No classes found. Make sure you\'re enrolled and that My Classes is showing your subjects.' });
+      dateInput.value = '';
+      refreshButton.click();
+      return;
+    }
+
+    const { error, value } = createEvents(events);
+    // Log the error but still attempt the send — value may be partially populated.
+    // Without this check a broken ICS would be downloaded with no indication of why.
+    if (error) {
+      console.error('[curtincalendar] createEvents error:', error);
+    }
     try {
       (await chrome.runtime.sendMessage({
         command: command.download,

@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "Curtin Calendar",
+  "name": "Curtin Calendar (Beta)",
   "version": "0.4.0",
   "description": "Export your Curtin timetable to ICS with room locations, Google Maps, and Curtin campus map links.",
   "icons": {
@@ -12,7 +12,7 @@
     "service_worker": "background.js"
   },
   "action": {
-    "default_title": "Curtin Calendar",
+    "default_title": "Curtin Calendar (Beta)",
     "default_popup": "popup.html"
   },
   "permissions": ["downloads", "storage", "tabs"],

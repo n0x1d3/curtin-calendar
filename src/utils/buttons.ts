@@ -52,7 +52,13 @@ export function readDate() {
   }
 
   // Fall back to native parsing (handles ISO YYYY-MM-DD, "Feb 16 2026", etc.)
-  return new Date(value);
+  const fallback = new Date(value);
+  // Warn loudly if the date couldn't be parsed — an Invalid Date will silently
+  // corrupt every event scraped from this week's timetable page.
+  if (isNaN(fallback.getTime())) {
+    console.error(`[curtincalendar] readDate: could not parse date input value "${value}"`);
+  }
+  return fallback;
 }
 
 // Clicks the "next week" navigation button on the timetable page.

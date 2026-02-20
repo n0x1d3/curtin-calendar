@@ -13,6 +13,12 @@ export const addEvents = async (events: EventAttributes[]) => {
     if (dayResult.length === 0) return;
 
     dayResult.forEach((event) => {
+      // Chrome storage serialises Date objects to ISO strings on write and does
+      // not restore them on read. Wrapping in new Date() handles both cases:
+      // if event.date is already a Date it passes through unchanged; if it is
+      // a string (after a storage round-trip) it is correctly parsed back.
+      const date = new Date(event.date);
+
       // Build the location/geo fields only if a physical room was found;
       // fall back to 'ONLINE' for classes without a room lookup result.
       const ifLocation = event.location
@@ -29,9 +35,9 @@ export const addEvents = async (events: EventAttributes[]) => {
         startOutputType: 'local',
         title: event.title + ' ' + event.type,
         start: [
-          event.date.getFullYear(),
-          event.date.getMonth() + 1,
-          event.date.getDate(),
+          date.getFullYear(),
+          date.getMonth() + 1,
+          date.getDate(),
           event.time.start.hour,
           event.time.start.minutes,
         ],

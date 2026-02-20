@@ -51,6 +51,19 @@ const common = {
           },
         ],
       },
+      // Handle font files referenced from CSS @font-face declarations
+      {
+        test: /\.(ttf|woff|woff2)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              outputPath: 'fonts',
+              name: '[name].[ext]',
+            },
+          },
+        ],
+      },
     ],
   },
   resolve: {
