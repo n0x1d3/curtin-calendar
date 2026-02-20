@@ -7,6 +7,8 @@ chrome.runtime.onMessage.addListener((request) => {
     const dataUrl =
       'data:text/calendar;charset=utf-8,' +
       encodeURIComponent(request.value as string);
-    chrome.downloads.download({ url: dataUrl, filename: 'CurtinCalendar.ics' });
+    // e.g. "Curtin Timetable Semester 1 2026.ics"
+    const filename = `Curtin Timetable Semester ${request.semester} ${request.year}.ics`;
+    chrome.downloads.download({ url: dataUrl, filename });
   }
 });

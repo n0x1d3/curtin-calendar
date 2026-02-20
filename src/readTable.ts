@@ -7,15 +7,15 @@ import { addEvents } from './utils/scrapEvents';
 // Reads the current scraping position from storage and either scrapes the
 // current week and advances, or finalises the ICS file when all weeks are done.
 async function readTable() {
-  const data = await chrome.storage.local.get(['forward', 'events', 'totalWeeks']);
+  const data = await chrome.storage.local.get(['forward', 'events', 'totalWeeks', 'semester']);
   const events: EventAttributes[] = data.events;
 
   // No active download session — nothing to do
   if (events === undefined) return;
 
   const forward: number = data.forward ?? 0;
-  // Fall back to 13 if totalWeeks wasn't stored (e.g. first run with old storage)
   const totalWeeks: number = data.totalWeeks ?? 13;
+  const semester: number = data.semester ?? 1;
 
   if (forward < totalWeeks) {
     // Scrape the current page BEFORE navigating so we don't race the DOM update.
@@ -47,9 +47,12 @@ async function readTable() {
       console.error('[curtincalendar] createEvents error:', error);
     }
     try {
+      // Pass semester and year so the background worker can name the file correctly.
       (await chrome.runtime.sendMessage({
         command: command.download,
         value: value,
+        semester: semester,
+        year: new Date().getFullYear(),
       })) as any;
     } catch {
       // Popup was closed before download completed — nothing to send to
