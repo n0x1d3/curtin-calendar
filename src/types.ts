@@ -53,5 +53,6 @@ export interface scrapedDataType {
   date: Date;
 }
 
-// Days in the format that matches the timetable website element IDs
-export const webDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+// Days in the format that matches the timetable website element IDs.
+// Saturday is included since some Curtin units (practicals, workshops) run on weekends.
+export const webDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

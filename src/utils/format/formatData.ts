@@ -37,9 +37,11 @@ export function convertTime(timeString: string): classTimeType {
 // --- Location lookup ---
 
 // Builds a MazeMap search URL for a given room query string.
-// campusid=296 is Curtin Perth; lat/lng are the campus centre used to boost nearby results.
+// No campusid filter — searches across all Curtin campuses in MazeMap (Perth, Perth City,
+// Dubai, Midland). The Perth lat/lng boost ensures Perth results rank first for Perth rooms;
+// rooms at other campuses are still found since the query string is campus-specific.
 const getMazeMapURL = (q: string) =>
-  `https://search.mazemap.com/search/equery/?q=${q}&rows=1&start=0&withpois=true&withbuilding=true&withtype=true&withcampus=true&campusid=296&lng=115.89582570734012&lat=-32.00742307052456&boostbydistance=true`;
+  `https://search.mazemap.com/search/equery/?q=${q}&rows=1&start=0&withpois=true&withbuilding=true&withtype=true&withcampus=true&lng=115.89582570734012&lat=-32.00742307052456&boostbydistance=true`;
 
 // Builds a Google Maps search URL from WGS84 coordinates.
 const googleMapsURL = ({ lat, lng }: { lat: number; lng: number }) =>
