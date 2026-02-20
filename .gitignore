@@ -5,6 +5,7 @@
 
 # production
 /build
+/build-beta
 
 # misc
 .DS_Store
