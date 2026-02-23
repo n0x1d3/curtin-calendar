@@ -51,18 +51,15 @@ const common = {
           },
         ],
       },
-      // Handle font files referenced from CSS @font-face declarations
+      // Handle font files referenced from CSS @font-face declarations.
+      // Uses webpack 5's native asset/resource instead of file-loader to
+      // avoid the hash-filename conflict that causes "Failed to decode font".
       {
         test: /\.(ttf|woff|woff2)$/,
-        use: [
-          {
-            loader: 'file-loader',
-            options: {
-              outputPath: 'fonts',
-              name: '[name].[ext]',
-            },
-          },
-        ],
+        type: 'asset/resource',
+        generator: {
+          filename: 'fonts/[name][ext]',
+        },
       },
     ],
   },
