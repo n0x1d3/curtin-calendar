@@ -17,10 +17,13 @@ export const refreshButton = document.getElementById(
 
 // Sets the timetable date input to the start of the given semester and submits
 // the filter form to load that week's timetable.
-export function setDate(sem: number) {
+export function setDate(sem: 1 | 2) {
   const dates = getDates(new Date().getFullYear());
-  const start = dates[sem as 1 | 2].start;
-  dateInput.value = `${start.day}-${start.month}-${new Date().getFullYear()}`;
+  const start = dates[sem].start;
+  const year = new Date().getFullYear();
+  const dd = String(start.day).padStart(2, '0');
+  const mm = String(start.month).padStart(2, '0');
+  dateInput.value = `${dd}-${mm}-${year}`;
   refreshButton.click();
 }
 
@@ -52,10 +55,16 @@ export function readDate() {
   }
 
   // Fall back to native parsing (handles ISO YYYY-MM-DD, "Feb 16 2026", etc.)
-  return new Date(value);
+  const fallback = new Date(value);
+  // Warn loudly if the date couldn't be parsed — an Invalid Date will silently
+  // corrupt every event scraped from this week's timetable page.
+  if (isNaN(fallback.getTime())) {
+    console.error(`[curtincalendar] readDate: could not parse date input value "${value}"`);
+  }
+  return fallback;
 }
 
 // Clicks the "next week" navigation button on the timetable page.
-export function ClickForward() {
+export function clickForward() {
   forwardButton.click();
 }

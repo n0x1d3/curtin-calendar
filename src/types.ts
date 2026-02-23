@@ -6,16 +6,14 @@ export enum command {
 
 // --- MazeMap API response shape (only the fields we use) ---
 export interface locationResponseType {
-  result: [
-    {
-      geometry: {
-        coordinates: [number, number]; // GeoJSON order: [longitude, latitude]
-      };
-      zValue: number;
-      dispBldNames: [string];
-      poiId: number;
-    }
-  ];
+  result: {
+    geometry: {
+      coordinates: [number, number]; // GeoJSON order: [longitude, latitude]
+    };
+    zValue: number;
+    dispBldNames: [string];
+    poiId: number;
+  }[];
 }
 
 // --- Time types ---
@@ -53,5 +51,6 @@ export interface scrapedDataType {
   date: Date;
 }
 
-// Days in the format that matches the timetable website element IDs
-export const webDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+// Days in the format that matches the timetable website element IDs.
+// Saturday is included since some Curtin units (practicals, workshops) run on weekends.
+export const webDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
