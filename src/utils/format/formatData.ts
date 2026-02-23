@@ -41,26 +41,29 @@ export function convertTime(timeString: string): classTimeType {
 // Dubai, Midland). The Perth lat/lng boost ensures Perth results rank first for Perth rooms;
 // rooms at other campuses are still found since the query string is campus-specific.
 const getMazeMapURL = (q: string) =>
-  `https://search.mazemap.com/search/equery/?q=${q}&rows=1&start=0&withpois=true&withbuilding=true&withtype=true&withcampus=true&lng=115.89582570734012&lat=-32.00742307052456&boostbydistance=true`;
+  `https://search.mazemap.com/search/equery/?q=${encodeURIComponent(q)}&rows=1&start=0&withpois=true&withbuilding=true&withtype=true&withcampus=true&lng=115.89582570734012&lat=-32.00742307052456&boostbydistance=true`;
 
 // Builds a Google Maps search URL from WGS84 coordinates.
 const googleMapsURL = ({ lat, lng }: { lat: number; lng: number }) =>
   `https://www.google.com/maps/search/?api=1&query=${lat}%2C${lng}`;
 
-// Builds a MazeMap deep link that opens and selects a specific room (Curtin Perth, campusid=296).
+// Builds a MazeMap deep link that opens and highlights a specific POI by ID.
+// poiId is globally unique in MazeMap so no campusid is needed here.
 const mazeMapURL = ({ lat, lng, floor, poiId }: { lat: number; lng: number; floor: number; poiId: number }) =>
-  `https://use.mazemap.com/#v=1&campusid=296&zlevel=${floor}&center=${lng},${lat}&zoom=18&sharepoitype=poi&sharepoi=${poiId}`;
+  `https://use.mazemap.com/#v=1&zlevel=${floor}&center=${lng},${lat}&zoom=18&sharepoitype=poi&sharepoi=${poiId}`;
 
 // Looks up the physical location of a room string (e.g. "212 107") via the
 // MazeMap API. Returns location metadata on success, or false on error/timeout.
 export async function getLocation(location: string) {
+  // Room format must be "BBB RRR" (building + room separated by a space).
+  // Single-word strings (e.g. "TBA", "ONLINE") have no room component — skip lookup.
+  const parts = location.split(' ');
+  if (parts.length < 2 || !parts[0] || !parts[1]) return false;
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 5000);
   try {
-    // Room format is "BBB RRR" (building + room); convert to "BBB.RRR" for MazeMap.
-    // Split on the space so building codes of any length are handled correctly
-    // (splitting at a hardcoded index of 3 breaks codes that aren't 3 characters).
-    const parts = location.split(' ');
+    // Convert "BBB RRR" to "BBB.RRR" for MazeMap's query format.
     const formatted = parts[0] + '.' + parts.slice(1).join('');
 
     const res = await fetch(getMazeMapURL(formatted), {
@@ -70,6 +73,8 @@ export async function getLocation(location: string) {
 
     const datares = (await res.json()) as locationResponseType;
     const data = datares.result[0];
+    // Guard against an empty result set (room not found in MazeMap).
+    if (!data) return false;
 
     // GeoJSON coordinates are [longitude, latitude]
     const lat = data.geometry.coordinates[1];

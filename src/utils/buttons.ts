@@ -20,7 +20,10 @@ export const refreshButton = document.getElementById(
 export function setDate(sem: 1 | 2) {
   const dates = getDates(new Date().getFullYear());
   const start = dates[sem].start;
-  dateInput.value = `${start.day}-${start.month}-${new Date().getFullYear()}`;
+  const year = new Date().getFullYear();
+  const dd = String(start.day).padStart(2, '0');
+  const mm = String(start.month).padStart(2, '0');
+  dateInput.value = `${dd}-${mm}-${year}`;
   refreshButton.click();
 }
 

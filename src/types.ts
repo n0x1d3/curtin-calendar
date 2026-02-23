@@ -6,16 +6,14 @@ export enum command {
 
 // --- MazeMap API response shape (only the fields we use) ---
 export interface locationResponseType {
-  result: [
-    {
-      geometry: {
-        coordinates: [number, number]; // GeoJSON order: [longitude, latitude]
-      };
-      zValue: number;
-      dispBldNames: [string];
-      poiId: number;
-    }
-  ];
+  result: {
+    geometry: {
+      coordinates: [number, number]; // GeoJSON order: [longitude, latitude]
+    };
+    zValue: number;
+    dispBldNames: [string];
+    poiId: number;
+  }[];
 }
 
 // --- Time types ---

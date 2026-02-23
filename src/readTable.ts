@@ -15,11 +15,11 @@ async function readTable() {
 
   const forward: number = data.forward ?? 0;
   const totalWeeks: number = data.totalWeeks ?? 13;
-  const semester: number = data.semester ?? 1;
+  const semester: 1 | 2 = (data.semester as 1 | 2) ?? 1;
 
   if (forward < totalWeeks) {
     // Scrape the current page BEFORE navigating so we don't race the DOM update.
-    // The try-catch ensures ClickForward always runs even if scraping fails for a week.
+    // The try-catch ensures clickForward always runs even if scraping fails for a week.
     try {
       await addEvents(events);
       await chrome.storage.local.set({ events: events, forward: forward + 1 });
@@ -41,10 +41,16 @@ async function readTable() {
     }
 
     const { error, value } = createEvents(events);
-    // Log the error but still attempt the send — value may be partially populated.
-    // Without this check a broken ICS would be downloaded with no indication of why.
     if (error) {
       console.error('[curtincalendar] createEvents error:', error);
+    }
+    // If value is missing (createEvents failed completely), show a user-facing error
+    // rather than downloading a file containing the literal string "undefined".
+    if (!value) {
+      await chrome.storage.local.set({ lastError: 'Failed to generate the calendar file. Please try again.' });
+      dateInput.value = '';
+      refreshButton.click();
+      return;
     }
     try {
       // Pass semester and year so the background worker can name the file correctly.
