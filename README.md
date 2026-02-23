@@ -20,14 +20,6 @@ Curtin Calendar reads your timetable from the Curtin student portal and generate
 - Dark mode with saved preference
 - Accurate semester date calculations for 2026–2028
 
-## Usage
-
-1. Log in to the [Curtin student portal](https://curtin-web.t1cloud.com) (eStudent)
-2. Navigate to **My Classes** under your timetable
-3. Click the Curtin Calendar extension icon in your browser toolbar
-4. Select your semester and click **Download** — an ICS file will be saved to your device
-5. Import the ICS file into Google Calendar, Apple Calendar, Outlook, or any calendar app
-
 ## Install
 
 **Option 1 — Chrome Web Store** (recommended)
@@ -40,6 +32,14 @@ Install directly from the [Chrome Web Store](https://chromewebstore.google.com/d
 2. Extract the zip
 3. Open `chrome://extensions` and enable **Developer mode**
 4. Click **Load unpacked** and select the extracted folder
+
+## Usage
+
+1. Log in to the [Curtin student portal](https://curtin-web.t1cloud.com) (eStudent)
+2. Navigate to **My Classes** under your timetable
+3. Click the Curtin Calendar extension icon in your browser toolbar
+4. Select your semester and click **Download** — an ICS file will be saved to your device
+5. Import the ICS file into Google Calendar, Apple Calendar, Outlook, or any calendar app
 
 ## Contributing
 
