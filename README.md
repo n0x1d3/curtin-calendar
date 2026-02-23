@@ -6,25 +6,33 @@ Curtin Calendar reads your timetable from the Curtin student portal and generate
 
 ## Features
 
-- One-click export of your full weekly timetable to ICS
+- One-click export of your full semester timetable to ICS
 - Room details in each event (building name, room number, floor)
 - Google Maps link for each physical class location
 - Curtin campus map link (MazeMap) that opens directly to the correct room and floor
 - Clickable hyperlinks in calendar apps that support HTML descriptions (Outlook, Apple Calendar)
+- Saturday classes supported
+- All Curtin campuses supported (Perth, Perth City, Dubai, Midland)
 - Online classes handled gracefully with no broken location data
-- Accurate semester date calculations for 2026 and beyond
+- Live progress bar showing which week is being scraped
+- Cancel button to stop or recover a stuck session
+- Smart error messages in plain English
+- Dark mode with saved preference
+- Accurate semester date calculations for 2026–2028
 
 ## Usage
 
 1. Log in to the [Curtin student portal](https://curtin-web.t1cloud.com) (eStudent)
 2. Navigate to **My Classes** under your timetable
 3. Click the Curtin Calendar extension icon in your browser toolbar
-4. Click **Download** — an ICS file will be saved to your device
+4. Select your semester and click **Download** — an ICS file will be saved to your device
 5. Import the ICS file into Google Calendar, Apple Calendar, Outlook, or any calendar app
 
 ## Install
 
-**Option 1 — Chrome Web Store** (coming soon)
+**Option 1 — Chrome Web Store** (recommended)
+
+Install directly from the [Chrome Web Store](https://chromewebstore.google.com/detail/gkofldgdkkcidpjikkoemccchhjhdlip).
 
 **Option 2 — Manual install**
 
@@ -44,7 +52,7 @@ Curtin Calendar reads your timetable from the Curtin student portal and generate
 
 ## Credits
 
-Based on the original [curtincalendar](https://github.com/SetroZ/curtincalendar) by [SetroZ](https://github.com/SetroZ). This fork has been significantly extended with room lookup, map links, HTML descriptions, and bug fixes for 2026+.
+Originally created by [SetroZ](https://github.com/SetroZ). Redesigned, extended, and maintained by [n0x1d3](https://github.com/n0x1d3) — with a new interface, improved reliability, and additional features.
 
 ## License
 
