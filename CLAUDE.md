@@ -12,6 +12,7 @@ Inherits all standards from `/Users/n0xde/Files/CLAUDE.md`. Only overrides and p
 - Beta build: `bun run build:beta`
 - Test: `bun run test`
 - Coverage: `bun run coverage`
+- Type check: `bunx tsc --noEmit`
 
 ## Stack
 - TypeScript + Webpack 5 + Chrome MV3 (browser extension)
@@ -23,4 +24,4 @@ Inherits all standards from `/Users/n0xde/Files/CLAUDE.md`. Only overrides and p
 - ICS generation uses the `ics` package — do not replace with native alternatives without checking compatibility
 - Room location links use Google Maps + MazeMap (Curtin campus map) — preserve both when editing event descriptions
 - Beta and production builds are separate webpack configs; keep them in sync when adding new entry points or assets
-- `curtinDates/` contains semester date data — update when adding support for new years
+- Semester date data lives in `src/utils/format/getDates.ts` (`knownYearOverrides`) — update this when adding support for new years (there is no separate `curtinDates/` folder)
