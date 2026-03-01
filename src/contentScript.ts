@@ -16,7 +16,7 @@ chrome.runtime.onMessage.addListener(function (request) {
       (async () => {
         await chrome.storage.local.set({ events: [], forward: 0, semester, totalWeeks });
         setDate(semester);
-      })();
+      })().catch((err) => console.error('[curtincalendar] contentScript init error:', err));
       break;
     }
   }

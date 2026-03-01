@@ -1,6 +1,6 @@
 {
   "name": "curtin-calendar",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "Export your Curtin timetable to ICS with room locations, Google Maps, and Curtin campus map links.",
   "license": "GPL-3.0-only",
   "private": true,
@@ -27,7 +27,7 @@
     "mini-css-extract-plugin": "^2.8.0",
     "prettier": "^2.8.8",
     "ts-loader": "^9.2.8",
-    "typescript": "^4.6.3",
+    "typescript": "^5.2.0",
     "vitest": "4.0.18",
     "webpack": "^5.90.3",
     "webpack-cli": "^4.10.0",

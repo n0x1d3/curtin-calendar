@@ -88,8 +88,9 @@ export async function getLocation(location: string) {
       url: googleMapsURL({ lat, lng }),
       campusMapUrl: mazeMapURL({ lat, lng, floor: data.zValue, poiId: data.poiId }),
     };
-  } catch {
+  } catch (err) {
     clearTimeout(timeout);
+    console.error('[curtincalendar] getLocation fetch error:', err);
     return false;
   }
 }

@@ -36,6 +36,28 @@ function addDays(date: Date, days: number) {
   return result;
 }
 
+// Extracts all typed fields from a single matched slot element pair.
+async function processSlot(
+  metDataElement: HTMLElement,
+  nameIdElement: HTMLElement,
+  date: Date,
+  dayIndex: number,
+): Promise<scrapedDataType> {
+  let type = '';
+  let location: LocationData | false = false;
+  let time: classTimeType = { start: { hour: 0, minutes: 0 }, end: { hour: 0, minutes: 0 }, differenceInMinutes: 0 };
+
+  for (const [key, value] of Object.entries(metDataClassNames)) {
+    const text = metDataElement.querySelector('.' + value)?.textContent ?? '';
+    if (key === 'time') time = convertTime(text);
+    else if (key === 'location') location = await getLocation(text);
+    else if (key === 'type') type = text;
+  }
+
+  const title = (nameIdElement.textContent ?? '').replace(/\s+/g, ' ').trim();
+  return { type, location, time, title, date: addDays(date, dayIndex) };
+}
+
 // How many slot indices to probe per day column. IDs in ASP.NET timetables are
 // sparse and non-sequential, so we scan a fixed range rather than stopping at
 // the first gap.
@@ -56,10 +78,8 @@ export default async function scrapData(date: Date) {
       const nameIdElement = document.getElementById(elementId.nameId);
       count++;
 
-      // Skip missing indices — ID gaps are common in ASP.NET timetables
       if (metDataElement === null || nameIdElement === null) continue;
 
-      // Skip slots missing any expected child span to avoid incomplete data
       const allChildrenPresent = Object.values(metDataClassNames).every(
         (cls) => metDataElement.querySelector('.' + cls) !== null
       );
@@ -69,23 +89,8 @@ export default async function scrapData(date: Date) {
         results[day] = [];
       }
 
-      let type = '';
-      let location: LocationData | false = false;
-      let time: classTimeType = { start: { hour: 0, minutes: 0 }, end: { hour: 0, minutes: 0 }, differenceInMinutes: 0 };
-
-      for (const [key, value] of Object.entries(metDataClassNames)) {
-        const text = metDataElement.querySelector('.' + value)?.textContent ?? '';
-        if (key === 'time') time = convertTime(text);
-        else if (key === 'location') location = await getLocation(text);
-        else if (key === 'type') type = text;
-      }
-
-      // Collapse whitespace in the unit code (e.g. "COMP1000 Lecture", not "COMP1000Lecture")
-      const title = (nameIdElement.textContent as string)
-        .replace(/\s+/g, ' ')
-        .trim();
-
-      results[day].push({ type, location, time, title, date: addDays(date, dayIndex) });
+      const slot = await processSlot(metDataElement, nameIdElement, date, dayIndex);
+      results[day].push(slot);
     }
     dayIndex++;
   }
