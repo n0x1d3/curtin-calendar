@@ -1,6 +1,6 @@
 {
   "name": "curtin-calendar",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "Export your Curtin timetable to ICS with room locations, Google Maps, and Curtin campus map links.",
   "license": "GPL-3.0-only",
   "private": true,
@@ -8,13 +8,17 @@
     "watch": "webpack --mode=development --watch --config config/webpack.config.js",
     "build": "webpack --mode=production --config config/webpack.config.js",
     "pack": "node pack.js",
-    "repack": "npm run build && npm run pack",
+    "repack": "bun run build && bun run pack",
     "watch:beta": "webpack --mode=development --watch --config config/webpack.beta.js",
     "build:beta": "webpack --mode=production --config config/webpack.beta.js",
-    "repack:beta": "npm run build:beta && node pack.beta.js",
-    "format": "prettier --write --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\""
+    "repack:beta": "bun run build:beta && node pack.beta.js",
+    "format": "prettier --write --ignore-unknown \"{config,public,src}/**/*.{html,css,js,ts,json}\"",
+    "test": "TZ=UTC vitest run",
+    "test:watch": "TZ=UTC vitest",
+    "coverage": "TZ=UTC vitest run --coverage"
   },
   "devDependencies": {
+    "@vitest/coverage-v8": "4.0.18",
     "@types/chrome": "^0.0.301",
     "adm-zip": "^0.5.10",
     "copy-webpack-plugin": "^10.2.4",
@@ -23,7 +27,8 @@
     "mini-css-extract-plugin": "^2.8.0",
     "prettier": "^2.8.8",
     "ts-loader": "^9.2.8",
-    "typescript": "^4.6.3",
+    "typescript": "^5.2.0",
+    "vitest": "4.0.18",
     "webpack": "^5.90.3",
     "webpack-cli": "^4.10.0",
     "webpack-merge": "^5.10.0"

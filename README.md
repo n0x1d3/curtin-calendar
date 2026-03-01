@@ -44,8 +44,8 @@ Install directly from the [Chrome Web Store](https://chromewebstore.google.com/d
 ## Contributing
 
 1. Fork the repo and clone it locally
-2. Run `npm i` to install dependencies
-3. Run `npm run watch` to build in watch mode
+2. Run `bun install` to install dependencies
+3. Run `bun run watch` to build in watch mode
 4. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, and select the `build/` folder
 5. Make your changes — the extension will rebuild automatically
 6. Submit a pull request

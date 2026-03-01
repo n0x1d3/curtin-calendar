@@ -1,5 +1,5 @@
 // pack.beta.js — same as pack.js but zips build-beta/ and labels the output as a beta release.
-// Run via: npm run repack:beta
+// Run via: bun run repack:beta
 
 const { readFileSync, existsSync, mkdirSync } = require('fs');
 const { parse, resolve } = require('path');
@@ -33,5 +33,5 @@ try {
     `Success! Created ${filename} under ${outdir}/. Share this ZIP with beta testers — they can load it via chrome://extensions > Load unpacked.`
   );
 } catch (e) {
-  console.error('Error! Failed to generate beta zip. Make sure you ran npm run build:beta first.');
+  console.error('Error! Failed to generate beta zip. Make sure you ran bun run build:beta first.');
 }

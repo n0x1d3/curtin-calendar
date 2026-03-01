@@ -1,5 +1,6 @@
 import './popup.css';
 import { command } from './types';
+import { getSmartErrorMessage, onError } from './utils/popupErrors';
 
 // The eStudent hostname and direct timetable URL used for page detection and the link.
 const ESTUDENT_HOST = 'curtin-web.t1cloud.com';
@@ -57,6 +58,26 @@ function stopPolling() {
 
 // --- Loading state ---
 
+// Updates all loading-state UI elements for the active scrape phase.
+function applyLoadingState(forward: number, total: number) {
+  const week = Math.min(forward + 1, total);
+  const pct = Math.min(100, Math.round((forward / total) * 100));
+
+  if (forward !== lastForwardValue) {
+    lastForwardValue = forward;
+    lastForwardTime = Date.now();
+    progressText.textContent = `Scraping week ${week} of ${total}…`;
+  } else if (Date.now() - lastForwardTime > STUCK_MS) {
+    progressText.textContent = 'Taking longer than expected — you can cancel and retry.';
+  }
+
+  button.style.display = 'none';
+  successArea.style.display = 'none';
+  loaderArea.style.display = 'flex';
+  progressBar.style.width = `${pct}%`;
+  wasLoading = true;
+}
+
 // Reads scraping progress from Chrome storage and updates every element of the UI:
 //   loading  → hide button/success, show loader-area with progress + stuck warning
 //   idle     → hide loader-area, show button (or success if we just finished)
@@ -67,39 +88,28 @@ async function updateLoadingUI() {
 
   if (loading) {
     const total = (totalWeeks as number) ?? 13;
-    // Cap at total — forward briefly equals totalWeeks while the final page
-    // is being processed, which would otherwise show e.g. "week 15 of 14".
-    const week = Math.min((forward as number) + 1, total);
-    const pct = Math.min(100, Math.round(((forward as number) / total) * 100));
-
-    // Stuck detection — warn if the same week has persisted for too long
-    if (forward !== lastForwardValue) {
-      lastForwardValue = forward as number;
-      lastForwardTime = Date.now();
-      progressText.textContent = `Scraping week ${week} of ${total}…`;
-    } else if (Date.now() - lastForwardTime > STUCK_MS) {
-      progressText.textContent = 'Taking longer than expected — you can cancel and retry.';
-    }
-
-    button.style.display = 'none';
-    successArea.style.display = 'none';
-    loaderArea.style.display = 'flex';
-    progressBar.style.width = `${pct}%`;
-    wasLoading = true;
+    applyLoadingState(forward as number, total);
   } else {
     loaderArea.style.display = 'none';
     lastForwardValue = undefined;
 
-    // Show the success screen only when transitioning from loading → idle,
-    // not on the initial popup open (which is also "not loading").
     if (wasLoading) {
       wasLoading = false;
-      // Check if the content script stored an error (e.g. no classes found)
-      // instead of completing successfully.
       const { lastError } = await chrome.storage.local.get('lastError');
       if (lastError) {
         await chrome.storage.local.remove('lastError');
-        onError(lastError as string);
+        onError({
+          message: lastError as string,
+          stopPollingFn: stopPolling,
+          checkIfOnEstudent,
+          setWasLoading: (value) => {
+            wasLoading = value;
+          },
+          button,
+          loaderArea,
+          successArea,
+          errorElement,
+        });
       } else {
         showSuccess();
       }
@@ -119,7 +129,6 @@ function showSuccess() {
   setTimeout(() => {
     successArea.style.display = 'none';
     button.style.display = 'block';
-    // Re-check page detection after returning to idle
     checkIfOnEstudent();
   }, 3000);
 }
@@ -141,48 +150,6 @@ function setupCancel() {
   });
 }
 
-// --- Error handling ---
-
-// Maps raw JS error messages to plain-English explanations for common failures.
-function getSmartErrorMessage(error: unknown): string {
-  const msg = error instanceof Error ? error.message : String(error);
-
-  if (msg.includes('Could not establish connection') || msg.includes('receiving end does not exist')) {
-    return 'Please open the My Classes page in eStudent first.';
-  }
-  if (msg.includes('No tab') || msg.includes('no tab')) {
-    return 'Could not detect the active tab. Try again.';
-  }
-  if (msg.includes('timeout') || msg.includes('AbortError')) {
-    return 'Connection timed out. Check your internet and try again.';
-  }
-  if (msg.includes('Cannot read') || msg.includes('is not a function')) {
-    return 'Could not read the timetable. Make sure My Classes is fully loaded.';
-  }
-
-  // Fall back to the raw message for anything unexpected
-  return msg;
-}
-
-// Displays a user-friendly error for 5 seconds then resets.
-function onError(message: string) {
-  stopPolling();
-  wasLoading = false;
-  loaderArea.style.display = 'none';
-  successArea.style.display = 'none';
-  button.style.display = 'block';
-
-  const original = errorElement.innerText;
-  errorElement.innerText = '⛔ ' + message;
-  errorElement.style.display = 'block';
-
-  setTimeout(async () => {
-    errorElement.style.display = 'none';
-    errorElement.innerText = original;
-    await checkIfOnEstudent();
-  }, 5000);
-}
-
 // --- Page detection ---
 
 // Checks whether the active tab is on the eStudent page.
@@ -195,8 +162,8 @@ async function checkIfOnEstudent() {
     button.disabled = !isOnPage;
     button.classList.toggle('disabled', !isOnPage);
     button.title = isOnPage ? '' : 'Open My Classes in eStudent first';
-  } catch {
-    // If the check fails (e.g. restricted page), don't block the user
+  } catch (err) {
+    console.error('[curtincalendar] checkIfOnEstudent failed:', err);
     button.disabled = false;
     button.classList.remove('disabled');
   }
@@ -210,17 +177,27 @@ function onClick() {
     try {
       await updateLoadingUI();
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-      (await chrome.tabs.sendMessage(tab.id as number, {
+      await chrome.tabs.sendMessage(tab.id as number, {
         command: command.click,
         semester: getSelectedSemester(),
-      })) as any;
-      // Short delay so the content script has time to write to storage
-      // before the first poll fires
+      });
       await new Promise((r) => setTimeout(r, 300));
       await updateLoadingUI();
       startPolling();
     } catch (error) {
-      onError(getSmartErrorMessage(error));
+      console.error('[curtincalendar] onClick error:', error);
+      onError({
+        message: getSmartErrorMessage(error),
+        stopPollingFn: stopPolling,
+        checkIfOnEstudent,
+        setWasLoading: (value) => {
+          wasLoading = value;
+        },
+        button,
+        loaderArea,
+        successArea,
+        errorElement,
+      });
     }
   });
 }
@@ -261,7 +238,7 @@ function getSelectedSemester(): 1 | 2 {
   const sem2 = (document.getElementById('semester2') as HTMLInputElement).checked;
   if (sem1) return 1;
   if (sem2) return 2;
-  console.log("ERROR: can't find a selected semester");
+  console.error('[curtincalendar] getSelectedSemester: no semester radio is checked');
   return currentSem();
 }
 
@@ -305,8 +282,6 @@ function setupVersion() {
   versionEl.textContent = `v${version}`;
 }
 
-// --- Entry point ---
-
 async function main() {
   setDefaultSemester();
   setupVersion();
@@ -316,12 +291,8 @@ async function main() {
   onClick();
   loadTheme();
   setupThemeToggle();
-
-  // If a scrape is already running (popup reopened mid-scrape), resume polling.
   const loading = await updateLoadingUI();
   if (loading) startPolling();
-
-  // Check whether the user is on the right page and update button state.
   await checkIfOnEstudent();
 }
 main();
