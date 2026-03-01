@@ -1,104 +1,110 @@
-# SPEC.md — Infrastructure: bun migration + test framework
+# SPEC.md — Codebase Cleanup
 
-_Last updated: 2026-02-27_
+_Last updated: 2026-03-01_
 _Status: APPROVED_
 
 ## Problem
-Two infrastructure gaps exist that violate root project standards (CLAUDE.md):
-1. The project uses npm (`package-lock.json`, internal `npm run` script calls) — root standards mandate bun exclusively.
-2. No test framework is configured — root standards require ~80% coverage on business logic.
+The codebase has accumulated several violations of the root standards defined in `/Users/n0xde/Files/CLAUDE.md`:
+- Four functions exceed the ~40-line limit
+- One file (`src/popup.ts`, 327 lines) exceeds the ~300-line limit
+- Several `catch` blocks silently swallow errors without logging
+- One `catch` block handles user-facing display but skips `console.error`
+- One `console.log` is used for an error condition instead of `console.error`
+- Two `as any` casts are removable without type regressions
+- One async IIFE in a Chrome message listener has no error handler
+
+No features are broken; this is a compliance and maintainability cleanup only.
 
 ## Goals
-- Replace npm with bun as the sole package manager
-- Set up Vitest as the test framework with coverage reporting
-- Write unit tests for all pure business-logic functions in `src/utils/format/formatData.ts` and `src/utils/format/getDates.ts`
-- All tests pass and `bun run test` exits 0 locally
+- Every source file is ≤ ~300 lines
+- Every function is ≤ ~40 lines (measured as total lines from opening line to closing brace, including blank lines, comments, and nested callbacks)
+- Every `catch` block either logs to `console.error` or has an explicit inline comment explaining why logging is intentionally omitted (e.g. expected no-op)
+- No `console.log` calls are used for error conditions — `console.error` is used instead
+- Two `as any` casts are removed from `popup.ts` and `readTable.ts` — only where the return value is unused and removal does not introduce type errors (`bunx tsc --noEmit` must still exit 0)
+- Unhandled async rejections in event listener IIFEs are caught and logged
+- All existing tests continue to pass (`bun run test` exits 0)
+- Coverage stays ≥80% lines and functions per file for `formatData.ts` and `getDates.ts` (`bun run coverage` exits 0)
+- `bun run build` exits 0
+- `bunx tsc --noEmit` exits 0
+- Key runtime behaviors are preserved: loading→success transition, stuck-detection timing (90 s), storage cleanup order in `finalizeDownload`, and `clickForward` always running after a scrape attempt
 
 ## Non-Goals
-- Testing DOM-dependent or Chrome-API-dependent code (popup, background, content script)
-- Changing any application logic or behaviour
-- Migrating from webpack to vite or any other build tool
-- Enforcing coverage thresholds in CI (out of scope for this iteration)
+- No new features
+- No new tests (existing coverage is already ≥80% for all testable pure functions; DOM/Chrome-API-dependent modules cannot be unit-tested without a browser environment)
+- No changes to build configuration (webpack, tsconfig, vitest.config.ts)
+- No changes to CSS, HTML, or manifest files
+- No architectural changes (no new modules, no folder restructuring beyond what's required to meet the file-length limit)
+- No changes to `bun.lock` beyond what `bun install` naturally produces
+- No lint tool installation (Prettier is already present; no ESLint is added)
+- No changes to test files
 
 ## Context
-Pure functions confirmed testable (no DOM, no Chrome API):
 
-**`src/utils/format/formatData.ts`**
-- `parseTo24h(time: string): timeStamp` — converts "8:00am" → `{ hour, minutes }`
-- `splitToStartEnd(timeString: string)` — splits a time range string into start/end parts
-- `convertTime(timeString: string): classTimeType` — converts a time range with duration calculation
+### Violations found in the audit (2026-03-01)
 
-**`src/utils/format/getDates.ts`**
-- `getnthMonday(date: Date, n: number): Date` — returns the nth Monday from a base date
-- `addnWeeks(date: Date, n: number): Date` — adds n weeks to a date
-- `calculateDatesPre2026(year: number): SemesterDates` — calculates semester dates before 2026
-- `calculateDates2026Plus(year: number): SemesterDates` — calculates semester dates 2026+
-- `calculateDates(year: number): SemesterDates` — dispatches to the appropriate year calculator
-- `getDates(year: number): SemesterDates` — returns semester metadata (lookup table then calculated)
-- `getSemesterWeeks(year: number, semester: 1|2): number` — returns week count for a semester
-
-Stack: TypeScript + Webpack 5 + Chrome MV3. Build uses `ts-loader`. No vite in the project.
+| File | Violation | Standard |
+|------|-----------|----------|
+| `src/popup.ts` | 327 lines | Max ~300 lines |
+| `src/popup.ts:updateLoadingUI` | ~50 lines | Max ~40 lines |
+| `src/readTable.ts:readTable` | ~62 lines | Max ~40 lines |
+| `src/utils/scrapData.ts:scrapData` | ~48 lines | Max ~40 lines |
+| `src/utils/scrapEvents.ts:addEvents` | ~64 lines | Max ~40 lines |
+| `src/popup.ts:264` | `console.log("ERROR: ...")` | Use `console.error` for errors |
+| `src/utils/format/formatData.ts:91` | `catch` block silent — no log | Always log to `console.error` |
+| `src/popup.ts:198` | `catch` block silent — no log | Always log to `console.error` |
+| `src/popup.ts:222` | `catch` handles UI only — no `console.error` | Always at minimum log to `console.error` |
+| `src/readTable.ts:64` | `catch` block silent — no log | Always log to `console.error` |
+| `src/contentScript.ts:16` | Async IIFE — no `.catch()` | Unhandled rejections must be caught |
+| `src/popup.ts:213` | `as any` cast on unused return value | Removable without type regression |
+| `src/readTable.ts:63` | `as any` cast on unused return value | Removable without type regression |
 
 ## Requirements
 
 ### Must Have
-- [ ] `bun install` exits 0; `bun.lock` (Bun ≥1.0.0 default) present and committed; `package-lock.json` absent from working tree
-- [ ] Internal `npm run` calls in `package.json` scripts (`repack`, `repack:beta`) replaced with `bun run`
-- [ ] `package.json` gains new scripts: `"test": "TZ=UTC vitest run"`, `"test:watch": "TZ=UTC vitest"`, `"coverage": "TZ=UTC vitest run --coverage"`; `TZ=UTC` inline env is the standard POSIX/macOS approach — Windows is not a supported platform for this project
-- [ ] `rm -rf build/ && bun run build` exits 0 and `build/` contains the four bundles from `config/webpack.config.js` entry points: `popup.js`, `background.js`, `contentScript.js`, `readTable.js`
-- [ ] Vitest and `@vitest/coverage-v8` installed as devDependencies with pinned versions in `package.json`; `bun.lock` committed to lock transitive dependencies for deterministic installs
-- [ ] `vitest.config.ts` created with:
-  - `environment: 'node'`
-  - `include: ['src/**/*.test.ts']` (test file discovery pattern)
-  - `coverage.provider: 'v8'`
-  - `coverage.include: ['src/utils/format/formatData.ts', 'src/utils/format/getDates.ts']`
-  - `coverage.reporter: ['text']`
-  - `coverage.thresholds: { perFile: true, lines: 80, functions: 80 }` (per-file enforcement, so each included file must individually meet 80%)
-- [ ] Test files placed at `src/utils/format/formatData.test.ts` and `src/utils/format/getDates.test.ts`
-- [ ] `bun run test` (which runs `TZ=UTC vitest run`) exits 0; timezone is fixed in the script — no separate invocation required
-- [ ] `bun run coverage` exits 0 with ≥80% lines and functions on the two included files (scoped exception: full-codebase 80% target deferred to a future iteration once DOM/Chrome-API mocking is in place)
-- [ ] Valid-input behavior of `formatData.ts` and `getDates.ts` covered via the three public exports only (`convertTime`, `getDates`, `getSemesterWeeks`) — no direct tests for private functions; no new exports added to production modules for testability; tests must not mutate shared `Date` instances (construct a fresh `Date` per assertion); invalid-input handling is explicitly excluded from coverage scope
-- [ ] `convertTime` test cases must include at minimum: a standard am range (`"9:00am - 10:00am"`), a standard pm range (`"2:30pm - 3:30pm"`), midnight boundary (`"12:00am - 1:00am"`, expected hour 0), and noon boundary (`"12:00pm - 1:00pm"`, expected hour 12); canonical input format is `"H:MMam - H:MMpm"` with spaces around the dash (matching timetable source data and the single-space-strip behavior in `splitToStartEnd`)
-- [ ] `getDates` tests verify exact `{ month, day }` values for one representative year per path:
-  - **2025** (pre-2026 calculated): sem1 `{ month:2, day:24 }` → `{ month:5, day:25 }` weeks 13; sem2 `{ month:7, day:21 }` → `{ month:10, day:19 }` weeks 13
-  - **2026** (lookup table): sem1 `{ month:2, day:16 }` → `{ month:5, day:22 }` weeks 14; sem2 `{ month:7, day:20 }` → `{ month:10, day:23 }` weeks 14
-  - **2029** (post-2028 calculated): sem1 `{ month:2, day:19 }` → `{ month:5, day:27 }` weeks 14; sem2 `{ month:7, day:16 }` → `{ month:10, day:21 }` weeks 14
-  - assertions must also confirm `start.month ≤ end.month` and `weeks > 0` for the tested year
-- [ ] `getSemesterWeeks` test matrix (exact expected values from existing source behavior):
-  - 2025 sem1 → 13, 2025 sem2 → 13 (pre-2026 calculated path)
-  - 2026 sem1 → 14, 2026 sem2 → 14 (lookup-table path)
-  - 2029 sem1 → 14, 2029 sem2 → 14 (post-2028 calculated path, 2026+ formula)
-- [ ] All npm command references removed from non-`node_modules` source files; known locations as of this writing (non-normative snapshot): `package.json` scripts, `package-lock.json`, `README.md` Contributing section, `pack.beta.js` comment and error message; the grep verification command below is the authoritative acceptance check
-- [ ] Verification command passes with no output: `grep -RInE "npm run|npm install|npm i([[:space:]]|$)|npm ci|npx " --exclude-dir=node_modules --exclude-dir=build --exclude-dir=build-beta --exclude-dir=release --exclude="SPEC.md" --exclude="AGENTS.md" --exclude="MEMORY.md" --exclude="PLAN.md" .`
+- [ ] `src/popup.ts` brought under ~300 lines by extracting self-contained logic into a new `src/utils/popupErrors.ts` module containing `getSmartErrorMessage` and `onError`
+- [ ] `src/popup.ts:updateLoadingUI` brought under ~40 lines by extracting the loading-state branch into a private `applyLoadingState` helper
+- [ ] `src/readTable.ts:readTable` brought under ~40 lines by extracting the scrape-week path into `scrapeWeek` and the finalise path into `finalizeDownload`
+- [ ] `src/utils/scrapData.ts:scrapData` brought under ~40 lines by extracting the per-slot processing into a `processSlot` helper
+- [ ] `src/utils/scrapEvents.ts:addEvents` brought under ~40 lines by extracting the per-event ICS object construction into a `buildEvent` helper
+- [ ] `src/popup.ts:264` — `console.log("ERROR: ...")` changed to `console.error`
+- [ ] `src/utils/format/formatData.ts:91` — `catch` block adds `console.error('[curtincalendar] getLocation fetch error:', err)` before returning `false`
+- [ ] `src/popup.ts:198` — `checkIfOnEstudent` `catch` block adds `console.error` before falling back
+- [ ] `src/popup.ts:222` — `onClick` `catch` block adds `console.error('[curtincalendar] onClick error:', error)` before calling `onError` (display and logging are both required)
+- [ ] `src/readTable.ts:64` — message channel `catch` block adds `console.error` (even though the drop is intentional, silent failures are not permitted)
+- [ ] `src/contentScript.ts:16` — async IIFE gains `.catch(err => console.error('[curtincalendar] contentScript init error:', err))`
+- [ ] `src/popup.ts:213` — remove `as any` cast from `chrome.tabs.sendMessage` (return value is unused; the outer `(...)as any` wrapper is removed, not the `tab.id as number` cast which is still needed)
+- [ ] `src/readTable.ts:63` — remove `as any` cast from `chrome.runtime.sendMessage` (return value is unused; no cast needed); verify `bunx tsc --noEmit` still exits 0
 
 ### Should Have
-- [ ] `bun run test:watch` starts Vitest in watch mode without config errors (acceptance: process starts and outputs "waiting for file changes…" or equivalent)
+- [ ] Each new helper function has a one-line comment explaining its purpose and why it exists as a separate function
 
 ### Won't Have (this iteration)
-- CI pipeline setup or changes (no CI config exists in this project)
-- Coverage thresholds enforced in CI
-- Tests for DOM/Chrome-API code
-- Malformed/invalid input handling tests for time-parsing or date functions
-- Migration away from webpack
-- Any changes to application logic or runtime behavior
+- New test files for DOM/Chrome-API-dependent modules (`popup.ts`, `contentScript.ts`, `background.ts`, `readTable.ts`, `scrapData.ts`, `scrapEvents.ts`) — requires a browser or complex mock infrastructure
+- ESLint or any new linting tool
+- Any change to `src/background.ts` (already compliant — 14 lines, zero violations)
+- Any change to `src/types.ts` (already compliant — 57 lines, zero violations)
+- Any change to `src/utils/format/getDates.ts` (already compliant)
+- Any change to `src/utils/format/formatData.ts` beyond the `catch` block fix
+- Any change to `src/utils/scrapEvents.ts` beyond the `addEvents` function-length refactor (the `htmlEscape` helper is already correct and is not touched)
 
 ## Open Questions
-- None — approach is clear.
+None — all violations are well-defined against the root standard.
+
+## Success Criteria
+A "passing" codebase after this cleanup:
+1. `bun run build` exits 0
+2. `bun run test` — all 14 tests pass
+3. `bun run coverage` — ≥80% lines and functions per file for `formatData.ts` and `getDates.ts`
+4. `bunx tsc --noEmit` exits 0
+5. No file in `src/` exceeds ~300 lines
+6. No declared function in `src/` exceeds ~40 lines (measured from opening line to closing brace, including blanks/comments)
+7. No `catch` block is silent without an explicit explanatory comment
+8. No `console.log` for error conditions
+9. The two `as any` wrapper casts on unused `sendMessage` return values are removed from `src/popup.ts` and `src/readTable.ts`; `bunx tsc --noEmit` still exits 0
+10. Key runtime behaviors preserved: loading→success transition, stuck-detection timing, storage cleanup order, `clickForward` always runs after a scrape attempt
 
 ## Review History
 | Round | Reviewer | Verdict | Date |
 |-------|----------|---------|------|
-| 1 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 2 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 3 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 4 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 5 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 6 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 7 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 8 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 9 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 10 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 11 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 12 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 13 | gpt-5.3-codex | NEEDS FIXES | 2026-02-27 |
-| 14 | gpt-5.3-codex | APPROVED | 2026-02-27 |
+| 1 | gpt-5.3-codex | NEEDS FIXES | 2026-03-01 |
+| 2 | gpt-5.3-codex | APPROVED | 2026-03-01 |

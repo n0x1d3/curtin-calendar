@@ -58,25 +58,34 @@ Inherited from CLAUDE.md — do not duplicate. Key points:
 - Watch: `bun run watch`
 - Pack: `bun run pack`
 - Format: `bun run format`
+- Beta build: `bun run build:beta`
 - Test: `bun run test`
 - Coverage: `bun run coverage`
+- Type check: `bunx tsc --noEmit`
 
 ## Architecture
 - Stack: TypeScript + Webpack 5 + Chrome MV3 (browser extension)
 - Key entry points:
-  - `src/popup.ts` — popup UI logic
-  - `src/background.ts` — MV3 service worker
-  - `src/contentScript.ts` — injected into Curtin eStudent timetable page
+  - `src/popup.ts` — popup UI: polling, loading state, cancel, error display, semester selection, theme, version
+  - `src/background.ts` — MV3 service worker: receives completed ICS from readTable and triggers chrome.downloads
+  - `src/contentScript.ts` — injected on page load: listens for the click command, initialises session state, navigates to semester start
+  - `src/readTable.ts` — content script entry: reads storage each page load, scrapes the current week or finalises the ICS file
 - Module structure:
-  - `src/readTable.ts` — parses timetable HTML
-  - `src/types.ts` — shared TypeScript types
-  - `src/utils/scrapData.ts` — raw data extraction
-  - `src/utils/scrapEvents.ts` — transforms data into ICS events
-  - `src/utils/buttons.ts` — popup button helpers
-  - `src/utils/format/` — formatting utilities
-  - `src/fonts/` — bundled font assets
-- Build output: `build/` (prod), `build-beta/` (beta)
-- ICS generation: `ics` package
+  - `src/types.ts` — shared TypeScript types (command enum, locationResponseType, scrapedDataType, webDays)
+  - `src/utils/buttons.ts` — timetable DOM refs (dateInput, forwardButton, refreshButton) and date helpers (setDate, readDate, clickForward)
+  - `src/utils/scrapData.ts` — scrapes all class slots for a week from the timetable DOM
+  - `src/utils/scrapEvents.ts` — transforms scraped data into ICS EventAttributes; contains htmlEscape helper
+  - `src/utils/format/formatData.ts` — time parsing (convertTime) and MazeMap API lookup (getLocation)
+  - `src/utils/format/getDates.ts` — semester date calculations: lookup table (2026-2028) + formula fallback
+  - `src/utils/format/formatData.test.ts` — Vitest unit tests for convertTime and getLocation
+  - `src/utils/format/getDates.test.ts` — Vitest unit tests for getDates and getSemesterWeeks
 
 ## Known Issues
-None.
+- `contentScript.ts`: Chrome ignores the Promise returned by async listeners — async work must live inside a synchronous listener via an inner IIFE. This is intentional, not a bug.
+- `popup.ts`: Chrome's `tabs.sendMessage` and `runtime.sendMessage` have broad return types in @types/chrome — the `as any` casts on these calls work around a @types/chrome limitation, not a code smell.
+- `scrapData.ts`: slot ID scan range is 0–19 (MAX_SLOTS = 20). This covers known Curtin timetables; a class at index 20+ would be silently missed.
+- `buttons.ts:readDate`: supports three date formats (DD-MM-YYYY, DD/MM/YYYY, native fallback) because ASP.NET postback changes the input field format after page reload.
+- ICS generation uses the `ics` npm package — do not replace with native alternatives; the X-ALT-DESC (htmlContent) field is package-specific.
+- Room location links use Google Maps + MazeMap (Curtin campus map) — preserve both when editing event descriptions.
+- Beta and production builds use separate webpack configs (`config/webpack.beta.js` vs `config/webpack.config.js`) — keep them in sync when adding entry points or assets.
+- `curtinDates/` is not present; semester dates live in `src/utils/format/getDates.ts` directly, in `knownYearOverrides`.
